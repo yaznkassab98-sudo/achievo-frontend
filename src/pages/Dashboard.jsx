@@ -153,8 +153,8 @@ export default function Dashboard() {
   }
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-amber border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen flex items-center justify-center bg-bg">
+      <div className="w-8 h-8 border-2 border-blue border-t-transparent rounded-full animate-spin" />
     </div>
   )
   if (!biz) return null
@@ -162,28 +162,32 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex">
       {/* SIDEBAR */}
-      <aside className="hidden md:flex w-60 flex-col border-r border-border bg-surface sticky top-0 h-screen">
-        <div className="p-5 border-b border-border">
+      <aside className="hidden md:flex w-60 flex-col sticky top-0 h-screen" style={{ background: '#0A1B33' }}>
+        <div className="p-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-amber flex items-center justify-center">
-              <IcAward size={13} className="text-bg" />
+            <div className="w-7 h-7 rounded-lg bg-blue flex items-center justify-center">
+              <IcAward size={13} className="text-white" />
             </div>
-            <span className="font-display font-black text-text" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
+            <span className="font-display font-black text-white" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </div>
-          <div className="bg-surface-2 rounded-xl p-3 border border-border">
-            <p className="font-display font-bold text-text text-sm truncate">{biz.name}</p>
+          <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <p className="font-display font-bold text-white text-sm truncate">{biz.name}</p>
             <div className="flex items-center justify-between mt-1">
-              <p className="text-text-faint text-xs font-mono truncate">{biz.slug}</p>
-              <span className={`badge text-[10px] px-2 py-0.5 ${biz.plan === 'free' ? 'badge-muted' : 'badge-amber'}`}>{biz.plan}</span>
+              <p className="text-xs font-mono truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{biz.slug}</p>
+              <span className="badge-blue text-[10px] px-2 py-0.5">{biz.plan}</span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 p-3 flex flex-col gap-1">
+        <nav className="flex-1 p-3 flex flex-col gap-0.5">
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full text-left
-                ${tab === t.id ? 'bg-amber/12 text-amber font-bold' : 'text-text-muted hover:text-text hover:bg-surface-2'}`}>
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all w-full text-left"
+              style={tab === t.id
+                ? { background: 'rgba(255,255,255,0.12)', color: '#FFFFFF', fontWeight: 700 }
+                : { color: 'rgba(255,255,255,0.5)' }}
+              onMouseEnter={e => { if (tab !== t.id) e.currentTarget.style.color = 'rgba(255,255,255,0.8)' }}
+              onMouseLeave={e => { if (tab !== t.id) e.currentTarget.style.color = 'rgba(255,255,255,0.5)' }}>
               <t.icon size={15} />
               {t.label}
               {t.id === 'overview' && pending.length > 0 && (
@@ -195,8 +199,11 @@ export default function Dashboard() {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border">
-          <button onClick={logout} className="flex items-center gap-2 text-text-muted text-sm hover:text-coral transition-colors w-full px-3 py-2 rounded-xl hover:bg-coral/8">
+        <div className="p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <button onClick={logout} className="flex items-center gap-2 text-sm transition-colors w-full px-3 py-2 rounded-xl"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#FF4D3B'; e.currentTarget.style.background = 'rgba(255,77,59,0.1)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; e.currentTarget.style.background = 'transparent' }}>
             <IcLogOut size={14} /> Sign out
           </button>
         </div>
@@ -209,7 +216,7 @@ export default function Dashboard() {
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
               className={`flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-display font-bold whitespace-nowrap transition-all flex-shrink-0
-                ${tab === t.id ? 'bg-amber text-bg' : 'text-text-muted'}`}>
+                ${tab === t.id ? 'bg-blue text-white' : 'text-text-muted'}`}>
               <t.icon size={12} /> {t.label}
             </button>
           ))}
@@ -230,7 +237,7 @@ export default function Dashboard() {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: 'Active challenges', value: challenges.filter(c => c.is_active).length, color: 'text-amber' },
+                { label: 'Active challenges', value: challenges.filter(c => c.is_active).length, color: 'text-blue' },
                 { label: 'Pending',           value: pending.length,                             color: 'text-coral'   },
                 { label: 'Staff members',     value: staff.length,                               color: 'text-text'    },
                 { label: 'Plan',              value: biz.plan,                                   color: 'text-green-stamp' },
@@ -255,7 +262,7 @@ export default function Dashboard() {
                 <div className="flex flex-col gap-2">
                   {pending.map(p => (
                     <div key={p.id} className="card p-4 flex items-center gap-3 border-coral/15">
-                      <div className="w-9 h-9 rounded-xl bg-amber/15 flex items-center justify-center font-display font-black text-amber text-sm flex-shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0">
                         {p.full_name?.[0]}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -267,7 +274,7 @@ export default function Dashboard() {
                   ))}
                 </div>
                 <p className="text-text-muted text-xs mt-3">
-                  Staff confirm on the <Link to="/staff" className="text-amber hover:underline">staff screen</Link> using their PIN.
+                  Staff confirm on the <Link to="/staff" className="text-blue hover:underline">staff screen</Link> using their PIN.
                 </p>
               </div>
             )}
@@ -333,7 +340,7 @@ export default function Dashboard() {
                       <button onClick={() => { setEditChallenge(c); setShowForm(false) }} className="p-2 text-text-muted hover:text-text transition-colors rounded-lg hover:bg-surface-2">
                         <IcPencil size={14} />
                       </button>
-                      <button onClick={() => toggleChallenge(c.id, c.is_active)} className={`p-2 transition-colors rounded-lg hover:bg-surface-2 ${c.is_active ? 'text-amber' : 'text-text-muted hover:text-green-stamp'}`}>
+                      <button onClick={() => toggleChallenge(c.id, c.is_active)} className={`p-2 transition-colors rounded-lg hover:bg-surface-2 ${c.is_active ? 'text-blue' : 'text-text-muted hover:text-green-stamp'}`}>
                         {c.is_active ? <IcChevronDown size={14} /> : <IcChevronUp size={14} />}
                       </button>
                       <button onClick={() => deleteChallenge(c.id)} className="p-2 text-text-muted hover:text-coral transition-colors rounded-lg hover:bg-coral/8">
@@ -372,14 +379,14 @@ export default function Dashboard() {
                 </div>
               ) : staff.map(s => (
                 <div key={s.id} className="card p-4 flex items-center gap-3 hover:border-border-2 transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-amber/15 flex items-center justify-center font-display font-black text-amber text-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0">
                     {s.name?.[0]}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text">{s.name}</p>
                     <p className="text-xs text-text-muted capitalize">{s.role}</p>
                   </div>
-                  <div className="font-mono text-amber text-sm font-bold tracking-[0.2em] bg-amber/8 border border-amber/20 px-3 py-1 rounded-lg">
+                  <div className="font-mono text-blue text-sm font-bold tracking-[0.2em] bg-blue/8 border border-blue/20 px-3 py-1 rounded-lg">
                     {s.pin_code}
                   </div>
                   <button onClick={() => removeStaff(s.id)} className="p-2 text-text-muted hover:text-coral transition-colors rounded-lg hover:bg-coral/8">
@@ -433,7 +440,7 @@ export default function Dashboard() {
               <ul className="flex flex-col gap-2">
                 {['Print and laminate near the register', 'Add a table tent in every seating area', 'Put it on your menu or packaging', 'Share the link in your Instagram bio'].map(t => (
                   <li key={t} className="flex items-start gap-2">
-                    <IcCheck size={12} className="text-amber flex-shrink-0 mt-0.5" /> {t}
+                    <IcCheck size={12} className="text-blue flex-shrink-0 mt-0.5" /> {t}
                   </li>
                 ))}
               </ul>

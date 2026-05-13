@@ -34,8 +34,8 @@ export default function BusinessSetup() {
       <div className="w-full max-w-md">
 
         <div className="flex items-center gap-2.5 mb-10">
-          <div className="w-8 h-8 rounded-lg bg-amber flex items-center justify-center">
-            <IcAward size={15} className="text-bg" />
+          <div className="w-8 h-8 rounded-lg bg-blue flex items-center justify-center">
+            <IcAward size={15} className="text-white" />
           </div>
           <span className="font-display font-black text-text text-lg" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
         </div>
@@ -45,7 +45,7 @@ export default function BusinessSetup() {
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex items-center gap-2 flex-1">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-display font-black flex-shrink-0 transition-all
-                ${step > s.n ? 'bg-green-stamp text-white' : step === s.n ? 'bg-amber text-bg' : 'bg-surface-2 text-text-muted border border-border'}`}>
+                ${step > s.n ? 'bg-green-stamp text-white' : step === s.n ? 'bg-blue text-white' : 'bg-surface-2 text-text-muted border border-border'}`}>
                 {step > s.n ? <IcCheck size={12} /> : s.n}
               </div>
               <span className={`text-xs font-display font-bold whitespace-nowrap ${step === s.n ? 'text-text' : 'text-text-muted'}`}>{s.label}</span>
@@ -87,7 +87,7 @@ export default function BusinessSetup() {
                 {CATEGORIES.map(cat => (
                   <button key={cat} type="button" onClick={() => set('category', cat)}
                     className={`py-2 px-1 rounded-xl text-xs font-display font-bold capitalize transition-all
-                      ${form.category === cat ? 'bg-amber text-bg' : 'bg-surface-2 text-text-muted hover:text-text border border-border hover:border-amber/40'}`}>
+                      ${form.category === cat ? 'bg-blue text-white' : 'bg-surface-2 text-text-muted hover:text-text border border-border hover:border-blue/40'}`}>
                     {cat}
                   </button>
                 ))}
@@ -153,8 +153,8 @@ export default function BusinessSetup() {
                 You're live!
               </h1>
               <p className="text-text-muted text-sm">
-                <span className="text-amber font-bold">{created.name}</span> is now on Achievo.<br />
-                Your code: <span className="font-mono text-amber font-bold">{created.slug}</span>
+                <span className="text-blue font-bold">{created.name}</span> is now on Achievo.<br />
+                Your code: <span className="font-mono text-blue font-bold">{created.slug}</span>
               </p>
             </div>
 
@@ -163,7 +163,7 @@ export default function BusinessSetup() {
               <ul className="flex flex-col gap-2.5">
                 {['Create your first challenge', 'Add staff members', 'Download your QR code'].map((item, i) => (
                   <li key={item} className="flex items-center gap-2.5 text-sm text-text">
-                    <span className="w-5 h-5 rounded-full bg-amber/15 text-amber text-xs font-display font-black flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                    <span className="w-5 h-5 rounded-full bg-blue/10 text-blue text-xs font-display font-black flex items-center justify-center flex-shrink-0">{i + 1}</span>
                     {item}
                   </li>
                 ))}

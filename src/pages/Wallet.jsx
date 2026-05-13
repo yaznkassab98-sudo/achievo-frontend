@@ -54,8 +54,8 @@ export default function Wallet() {
       <nav className="sticky top-0 z-40 border-b border-border/50 backdrop-blur-2xl bg-bg/90">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-amber flex items-center justify-center">
-              <IcAward size={12} className="text-bg" />
+            <div className="w-6 h-6 rounded-md bg-blue flex items-center justify-center">
+              <IcAward size={12} className="text-white" />
             </div>
             <span className="font-display font-black text-text" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </Link>
@@ -73,13 +73,13 @@ export default function Wallet() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* PROFILE CARD */}
         <div className="rounded-2xl p-6 mb-6 relative overflow-hidden border border-border"
-          style={{ background: 'linear-gradient(135deg, #1F2340 0%, #111320 100%)' }}>
+          style={{ background: 'linear-gradient(135deg, #0A1B33 0%, #0F2444 100%)' }}>
           {/* Decorative glow */}
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-20 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, #F5A623 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
+            style={{ background: 'radial-gradient(circle, #2767FF 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
 
           <div className="relative flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber/20 flex items-center justify-center font-display font-black text-2xl text-amber border border-amber/25 flex-shrink-0">
+            <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 flex-shrink-0">
               {user?.full_name?.[0]?.toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
@@ -120,7 +120,7 @@ export default function Wallet() {
           {[['rewards', 'My rewards'], ['history', 'History']].map(([t, l]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-1 py-2.5 rounded-lg text-sm font-display font-bold transition-all
-                ${tab === t ? 'bg-surface-2 text-text' : 'text-text-muted hover:text-text'}`}>
+                ${tab === t ? 'bg-white text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
               {l}
             </button>
           ))}
@@ -128,7 +128,7 @@ export default function Wallet() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <div className="w-6 h-6 border-2 border-amber border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-blue border-t-transparent rounded-full animate-spin" />
           </div>
         ) : tab === 'rewards' ? (
           <div className="flex flex-col gap-3">

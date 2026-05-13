@@ -46,7 +46,7 @@ export default function EditProfile() {
 
       <div className="max-w-lg mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-amber/20 border border-amber/25 flex items-center justify-center font-display font-black text-2xl text-amber">
+          <div className="w-16 h-16 rounded-2xl bg-blue/15 border border-blue/20 flex items-center justify-center font-display font-black text-2xl text-blue">
             {user?.full_name?.[0]?.toUpperCase()}
           </div>
           <div>

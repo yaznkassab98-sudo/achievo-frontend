@@ -20,8 +20,8 @@ const CATS = [
 ]
 
 const CAT_ACCENTS = {
-  cafe: '#F5A623', restaurant: '#FF5C3A', salon: '#A78BFA',
-  hotel: '#38BDF8', gym: '#22C55E', retail: '#F472B6', '': '#F5A623',
+  cafe: '#FF8A3D', restaurant: '#FF5C3A', salon: '#A78BFA',
+  hotel: '#38BDF8', gym: '#22C55E', retail: '#F472B6', '': '#2767FF',
 }
 
 function QrModal({ onClose, onResult }) {
@@ -70,10 +70,10 @@ function QrModal({ onClose, onResult }) {
             {started && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                 <div className="w-48 h-48 relative">
-                  <div className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-amber rounded-tl-lg" />
-                  <div className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-amber rounded-tr-lg" />
-                  <div className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-amber rounded-bl-lg" />
-                  <div className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-amber rounded-br-lg" />
+                  <div className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-blue rounded-tl-lg" />
+                  <div className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-blue rounded-tr-lg" />
+                  <div className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-blue rounded-bl-lg" />
+                  <div className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-blue rounded-br-lg" />
                 </div>
               </div>
             )}
@@ -174,8 +174,8 @@ export default function Browse() {
       <nav className="sticky top-0 z-40 border-b border-border/50 backdrop-blur-2xl bg-bg/90">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-6 h-6 rounded-md bg-amber flex items-center justify-center">
-              <IcAward size={12} className="text-bg" />
+            <div className="w-6 h-6 rounded-md bg-blue flex items-center justify-center">
+              <IcAward size={12} className="text-white" />
             </div>
             <span className="font-display font-black text-text hidden sm:block" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </Link>
@@ -194,7 +194,7 @@ export default function Browse() {
               <IcHash size={13} /> Code
             </button>
             {user
-              ? <Link to="/wallet" className="badge-amber text-xs">Wallet</Link>
+              ? <Link to="/wallet" className="badge-blue text-xs">Wallet</Link>
               : <Link to="/auth" className="btn-primary text-xs px-3 py-1.5">Sign in</Link>
             }
           </div>
@@ -207,9 +207,9 @@ export default function Browse() {
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <IcMapPin size={14} className="text-amber" />
+              <IcMapPin size={14} className="text-blue" />
               <select value={city} onChange={e => setCity(e.target.value)}
-                className="bg-transparent text-amber font-display font-black text-sm focus:outline-none cursor-pointer" style={{ letterSpacing: '-0.01em' }}>
+                className="bg-transparent text-blue font-display font-black text-sm focus:outline-none cursor-pointer" style={{ letterSpacing: '-0.01em' }}>
                 <option value="istanbul">Istanbul</option>
                 <option value="ankara">Ankara</option>
               </select>

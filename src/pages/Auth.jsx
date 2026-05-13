@@ -45,13 +45,13 @@ export default function Auth() {
 
       {/* LEFT — brand panel (desktop only) */}
       <div className="hidden lg:flex w-[45%] flex-col justify-between p-12 border-r border-border relative overflow-hidden"
-        style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(245,166,35,0.1) 0%, transparent 60%)' }}>
+        style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(39,103,255,0.07) 0%, transparent 60%)' }}>
 
         {/* Decorative SVG city grid */}
         <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#F5A623" strokeWidth="1"/>
+              <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#2767FF" strokeWidth="1"/>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#grid)"/>
@@ -79,15 +79,15 @@ export default function Auth() {
         </div>
 
         <Link to="/" className="flex items-center gap-2.5 relative z-10">
-          <div className="w-8 h-8 rounded-lg bg-amber flex items-center justify-center">
-            <IcAward size={15} className="text-bg" />
+          <div className="w-8 h-8 rounded-lg bg-blue flex items-center justify-center">
+            <IcAward size={15} className="text-white" />
           </div>
           <span className="font-display font-black text-text text-lg" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
         </Link>
 
         <div className="relative z-10">
           <h2 className="font-display font-black text-text mb-3" style={{ fontSize: 'clamp(2rem,3.5vw,3rem)', letterSpacing: '-0.04em', lineHeight: '0.95' }}>
-            City loyalty,<br /><span className="text-amber">simplified.</span>
+            City loyalty,<br /><span className="text-blue">simplified.</span>
           </h2>
           <p className="text-text-muted text-sm leading-relaxed max-w-xs">
             Join hundreds of Istanbul businesses turning everyday visits into lasting loyalty.
@@ -96,8 +96,8 @@ export default function Auth() {
           <div className="flex flex-col gap-2.5 mt-8">
             {['No setup fees', 'First challenge free', 'Staff confirm in seconds'].map(f => (
               <div key={f} className="flex items-center gap-2.5 text-sm text-text-muted">
-                <div className="w-4 h-4 rounded-full bg-amber/15 flex items-center justify-center flex-shrink-0">
-                  <IcCheck size={9} className="text-amber" />
+                <div className="w-4 h-4 rounded-full bg-blue/15 flex items-center justify-center flex-shrink-0">
+                  <IcCheck size={9} className="text-blue" />
                 </div>
                 {f}
               </div>
@@ -118,8 +118,8 @@ export default function Auth() {
 
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-7 h-7 rounded-lg bg-amber flex items-center justify-center">
-              <IcAward size={13} className="text-bg" />
+            <div className="w-7 h-7 rounded-lg bg-blue flex items-center justify-center">
+              <IcAward size={13} className="text-white" />
             </div>
             <span className="font-display font-black text-text" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </div>
@@ -137,7 +137,7 @@ export default function Auth() {
               {[['customer', "I'm a customer"], ['business_owner', 'I own a business']].map(([r, l]) => (
                 <button key={r} onClick={() => setRole(r)}
                   className={`flex-1 py-2.5 rounded-lg text-sm font-display font-bold transition-all
-                    ${role === r ? 'bg-amber text-bg' : 'text-text-muted hover:text-text'}`}>
+                    ${role === r ? 'bg-blue text-white' : 'text-text-muted hover:text-text'}`}>
                   {l}
                 </button>
               ))}
@@ -191,7 +191,7 @@ export default function Auth() {
 
           <p className="text-center text-text-muted text-sm mt-7">
             {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button onClick={() => setMode(m => m === 'login' ? 'signup' : 'login')} className="text-amber hover:text-amber-light transition-colors font-semibold">
+            <button onClick={() => setMode(m => m === 'login' ? 'signup' : 'login')} className="text-blue hover:text-blue-dim transition-colors font-semibold">
               {mode === 'login' ? 'Sign up free' : 'Sign in'}
             </button>
           </p>

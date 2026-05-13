@@ -62,8 +62,8 @@ export default function StaffPin() {
   return (
     <div className="min-h-screen flex flex-col bg-bg">
       <nav className="border-b border-border bg-surface/80 backdrop-blur-xl px-4 h-14 flex items-center gap-2.5">
-        <div className="w-6 h-6 rounded-md bg-amber flex items-center justify-center">
-          <IcAward size={12} className="text-bg" />
+        <div className="w-6 h-6 rounded-md bg-blue flex items-center justify-center">
+          <IcAward size={12} className="text-white" />
         </div>
         <span className="font-display font-black text-text text-sm" style={{ letterSpacing: '-0.02em' }}>Achievo Staff</span>
         {bizName && (
@@ -79,8 +79,8 @@ export default function StaffPin() {
         {!bizId ? (
           <div className="flex flex-col gap-8 items-center justify-center flex-1 py-12">
             <div className="text-center">
-              <div className="w-16 h-16 rounded-2xl bg-amber/10 border border-amber/20 flex items-center justify-center mx-auto mb-5">
-                <IcAward size={28} className="text-amber" />
+              <div className="w-16 h-16 rounded-2xl bg-blue/10 border border-blue/20 flex items-center justify-center mx-auto mb-5">
+                <IcAward size={28} className="text-blue" />
               </div>
               <h1 className="font-display font-black text-text mb-1" style={{ fontSize: '1.6rem', letterSpacing: '-0.03em' }}>
                 Staff confirm
@@ -128,7 +128,7 @@ export default function StaffPin() {
                 {pending.map(p => (
                   <button key={p.id} onClick={() => { setSelected(p); setPin('') }}
                     className="card-hover p-4 flex items-center gap-3 text-left w-full active:scale-[0.99]">
-                    <div className="w-10 h-10 rounded-xl bg-amber/15 flex items-center justify-center font-display font-black text-amber flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue flex-shrink-0">
                       {p.full_name?.[0]}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -152,7 +152,7 @@ export default function StaffPin() {
             <div className="ticket">
               <div className="ticket-body">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber/15 flex items-center justify-center font-display font-black text-amber flex-shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue flex-shrink-0">
                     {selected.full_name?.[0]}
                   </div>
                   <div>
@@ -181,8 +181,8 @@ export default function StaffPin() {
                   <div className={`flex gap-3 justify-center ${shake ? 'animate-[shake_0.4s_ease]' : ''}`}>
                     {Array(6).fill(0).map((_, i) => (
                       <div key={i} className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all duration-150
-                        ${i < pin.length ? 'border-amber bg-amber/15' : 'border-border bg-surface-2'}`}>
-                        {i < pin.length && <div className="w-2.5 h-2.5 rounded-full bg-amber" />}
+                        ${i < pin.length ? 'border-blue bg-blue/15' : 'border-border bg-surface-2'}`}>
+                        {i < pin.length && <div className="w-2.5 h-2.5 rounded-full bg-blue" />}
                       </div>
                     ))}
                   </div>
@@ -191,14 +191,14 @@ export default function StaffPin() {
                 <div className="grid grid-cols-3 gap-3">
                   {[1,2,3,4,5,6,7,8,9].map(k => (
                     <button key={k} onClick={() => pressKey(String(k))}
-                      className="h-14 rounded-2xl bg-surface border border-border font-display font-black text-xl text-text hover:bg-surface-2 hover:border-amber/30 active:scale-95 active:bg-amber/10 transition-all">
+                      className="h-14 rounded-2xl bg-surface border border-border font-display font-black text-xl text-text hover:bg-blue/8 hover:border-blue/30 active:scale-95 active:bg-blue/10 transition-all">
                       {k}
                     </button>
                   ))}
                   <button onClick={reject} className="h-14 rounded-2xl bg-coral/10 border border-coral/20 flex items-center justify-center hover:bg-coral/20 active:scale-95 transition-all">
                     <IcX size={18} className="text-coral" />
                   </button>
-                  <button onClick={() => pressKey('0')} className="h-14 rounded-2xl bg-surface border border-border font-display font-black text-xl text-text hover:bg-surface-2 hover:border-amber/30 active:scale-95 transition-all">
+                  <button onClick={() => pressKey('0')} className="h-14 rounded-2xl bg-surface border border-border font-display font-black text-xl text-text hover:bg-blue/8 hover:border-blue/30 active:scale-95 transition-all">
                     0
                   </button>
                   <button onClick={backspace} className="h-14 rounded-2xl bg-surface border border-border flex items-center justify-center hover:bg-surface-2 active:scale-95 transition-all">

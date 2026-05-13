@@ -174,18 +174,18 @@ export default function BusinessPage() {
         <div className="flex flex-wrap gap-2 mb-10">
           {biz.address && (
             <a href={biz.google_maps_url || '#'} target="_blank" rel="noreferrer"
-              className="badge-muted text-xs flex items-center gap-1.5 hover:border-amber/40 hover:text-text transition-colors">
+              className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
               <IcMapPin size={10} /> {biz.address}
             </a>
           )}
           {biz.website && (
             <a href={biz.website} target="_blank" rel="noreferrer"
-              className="badge-muted text-xs flex items-center gap-1.5 hover:border-amber/40 hover:text-text transition-colors">
+              className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
               <IcGlobe size={10} /> Website
             </a>
           )}
           {biz.phone && (
-            <a href={`tel:${biz.phone}`} className="badge-muted text-xs flex items-center gap-1.5 hover:border-amber/40 hover:text-text transition-colors">
+            <a href={`tel:${biz.phone}`} className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
               <IcPhone size={10} /> {biz.phone}
             </a>
           )}

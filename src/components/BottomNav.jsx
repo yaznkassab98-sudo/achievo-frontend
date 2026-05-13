@@ -58,10 +58,10 @@ function QrOverlay({ onClose }) {
           {started && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               <div className="w-44 h-44 relative">
-                <div className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-amber rounded-tl-lg" />
-                <div className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-amber rounded-tr-lg" />
-                <div className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-amber rounded-bl-lg" />
-                <div className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-amber rounded-br-lg" />
+                <div className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-blue rounded-tl-lg" />
+                <div className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-blue rounded-tr-lg" />
+                <div className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-blue rounded-bl-lg" />
+                <div className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-blue rounded-br-lg" />
               </div>
             </div>
           )}
@@ -85,21 +85,21 @@ export default function BottomNav() {
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-bg/95 backdrop-blur-2xl md:hidden">
         <div className="flex items-center justify-around px-4 py-3 max-w-md mx-auto pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <Link to="/browse" className={`flex flex-col items-center gap-1 px-6 py-1.5 rounded-xl transition-all
-            ${active('/browse') || active('/b') ? 'text-amber' : 'text-text-muted'}`}>
+            ${active('/browse') || active('/b') ? 'text-blue' : 'text-text-muted'}`}>
             <IcCompass size={21} />
             <span className="text-[10px] font-display font-bold">Browse</span>
           </Link>
 
           <button onClick={() => setShowScanner(true)} className="flex flex-col items-center -mt-6 relative">
-            <div className="w-14 h-14 rounded-2xl bg-amber flex items-center justify-center active:scale-95 transition-all"
-              style={{ boxShadow: '0 0 24px rgba(245,166,35,0.45)' }}>
-              <IcQr size={24} className="text-bg" />
+            <div className="w-14 h-14 rounded-2xl bg-blue flex items-center justify-center active:scale-95 transition-all"
+              style={{ boxShadow: '0 0 24px rgba(39,103,255,0.45)' }}>
+              <IcQr size={24} className="text-white" />
             </div>
             <span className="text-[10px] font-display font-bold text-text-muted mt-1.5">Scan</span>
           </button>
 
           <Link to={user ? '/wallet' : '/auth'} className={`flex flex-col items-center gap-1 px-6 py-1.5 rounded-xl transition-all
-            ${active('/wallet') || active('/profile') ? 'text-amber' : 'text-text-muted'}`}>
+            ${active('/wallet') || active('/profile') ? 'text-blue' : 'text-text-muted'}`}>
             <IcWallet size={21} />
             <span className="text-[10px] font-display font-bold">Wallet</span>
           </Link>

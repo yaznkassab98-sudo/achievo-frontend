@@ -36,10 +36,10 @@ const REVIEWS = [
 function PlanCard({ plan, annual }) {
   const price = annual ? Math.floor(plan.price * 0.8) : plan.price
   return (
-    <div className={`card flex flex-col gap-5 p-6 relative transition-all duration-200 hover:-translate-y-1 ${plan.hot ? 'border-amber/50 ring-1 ring-amber/15' : ''}`}
-      style={plan.hot ? { boxShadow: '0 0 40px rgba(245,166,35,0.1)' } : {}}>
+    <div className={`card flex flex-col gap-5 p-6 relative transition-all duration-200 hover:-translate-y-1 ${plan.hot ? 'border-blue/40 ring-1 ring-blue/15' : ''}`}
+      style={plan.hot ? { boxShadow: '0 0 40px rgba(39,103,255,0.1)' } : {}}>
       {plan.hot && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber text-bg text-xs font-display font-black px-3 py-0.5 rounded-full tracking-wide">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue text-white text-xs font-display font-black px-3 py-0.5 rounded-full tracking-wide">
           MOST POPULAR
         </div>
       )}
@@ -76,8 +76,8 @@ export default function Landing() {
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/40 backdrop-blur-2xl bg-bg/75">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber flex items-center justify-center">
-              <IcAward size={13} className="text-bg" />
+            <div className="w-7 h-7 rounded-lg bg-blue flex items-center justify-center">
+              <IcAward size={13} className="text-white" />
             </div>
             <span className="font-display font-black text-text tracking-tight" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </Link>
@@ -102,13 +102,13 @@ export default function Landing() {
 
             {/* LEFT — editorial headline */}
             <div>
-              <div className="inline-flex items-center gap-2 badge-amber mb-8 text-xs px-3 py-1.5 font-display font-bold tracking-widest uppercase">
+              <div className="inline-flex items-center gap-2 badge-blue mb-8 text-xs px-3 py-1.5 font-display font-bold tracking-widest uppercase">
                 <IcMapPin size={11} /> Now live · Istanbul
               </div>
 
               <h1 className="font-display font-black text-text mb-6" style={{ fontSize: 'clamp(3.25rem, 8vw, 6.5rem)', lineHeight: '0.92', letterSpacing: '-0.04em' }}>
                 <span className="block">Turn every</span>
-                <span className="block text-amber">visit into</span>
+                <span className="block text-blue">visit into</span>
                 <span className="block">loyalty.</span>
               </h1>
 
@@ -210,7 +210,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-3 gap-px bg-border rounded-2xl overflow-hidden">
           {STEPS.map((step, i) => (
             <div key={step.n} className="bg-surface p-8 flex flex-col gap-4">
-              <div className="font-display font-black text-amber/20" style={{ fontSize: 'clamp(3rem,6vw,5rem)', lineHeight: 1, letterSpacing: '-0.05em' }}>{step.n}</div>
+              <div className="font-display font-black text-blue/15" style={{ fontSize: 'clamp(3rem,6vw,5rem)', lineHeight: 1, letterSpacing: '-0.05em' }}>{step.n}</div>
               <h3 className="font-display font-bold text-xl text-text">{step.title}</h3>
               <p className="text-text-muted text-sm leading-relaxed">{step.desc}</p>
             </div>
@@ -235,7 +235,7 @@ export default function Landing() {
               <div className="grid grid-cols-3 gap-2">
                 {[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map((k, i) => (
                   <button key={i} className={`h-11 rounded-xl font-display font-bold text-base transition-all
-                    ${k === '' ? 'invisible' : 'bg-surface-3 text-text hover:bg-amber/15 hover:text-amber border border-border hover:border-amber/30'}`}>
+                    ${k === '' ? 'invisible' : 'bg-surface-2 text-text hover:bg-blue/8 hover:text-blue border border-border hover:border-blue/30'}`}>
                     {k}
                   </button>
                 ))}
@@ -245,8 +245,8 @@ export default function Landing() {
 
           {/* QR */}
           <div className="md:col-span-5 card p-7">
-            <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center mb-5">
-              <IcQr size={18} className="text-amber" />
+            <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center mb-5">
+              <IcQr size={18} className="text-blue" />
             </div>
             <p className="section-label mb-2">QR Codes</p>
             <h3 className="font-display font-bold text-xl text-text mb-2">One scan, all challenges</h3>
@@ -255,8 +255,8 @@ export default function Landing() {
 
           {/* Analytics */}
           <div className="md:col-span-4 card p-7">
-            <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center mb-5">
-              <IcBarChart size={18} className="text-amber" />
+            <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center mb-5">
+              <IcBarChart size={18} className="text-blue" />
             </div>
             <p className="section-label mb-2">Analytics</p>
             <h3 className="font-display font-bold text-xl text-text mb-2">See what's working</h3>
@@ -275,8 +275,8 @@ export default function Landing() {
 
           {/* Instant */}
           <div className="md:col-span-4 card p-7">
-            <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center mb-5">
-              <IcZap size={18} className="text-amber" />
+            <div className="w-10 h-10 rounded-xl bg-blue/10 flex items-center justify-center mb-5">
+              <IcZap size={18} className="text-blue" />
             </div>
             <p className="section-label mb-2">Instant</p>
             <h3 className="font-display font-bold text-xl text-text mb-2">Confirmed in seconds</h3>
@@ -318,8 +318,8 @@ export default function Landing() {
               Simple,<br />honest pricing.
             </h2>
             <div className="inline-flex items-center gap-2 bg-surface border border-border p-1 rounded-xl self-start sm:self-auto">
-              <button onClick={() => setAnnual(false)} className={`px-4 py-2 rounded-lg text-sm font-display font-bold transition-all ${!annual ? 'bg-amber text-bg' : 'text-text-muted'}`}>Monthly</button>
-              <button onClick={() => setAnnual(true)} className={`px-4 py-2 rounded-lg text-sm font-display font-bold transition-all ${annual ? 'bg-amber text-bg' : 'text-text-muted'}`}>
+              <button onClick={() => setAnnual(false)} className={`px-4 py-2 rounded-lg text-sm font-display font-bold transition-all ${!annual ? 'bg-blue text-white' : 'text-text-muted'}`}>Monthly</button>
+              <button onClick={() => setAnnual(true)} className={`px-4 py-2 rounded-lg text-sm font-display font-bold transition-all ${annual ? 'bg-blue text-white' : 'text-text-muted'}`}>
                 Annual <span className="text-xs ml-1 text-green-stamp">−20%</span>
               </button>
             </div>
@@ -334,7 +334,7 @@ export default function Landing() {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="card p-14 text-center relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% -20%, rgba(245,166,35,0.15) 0%, transparent 65%)' }} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% -20%, rgba(39,103,255,0.08) 0%, transparent 65%)' }} />
             <p className="section-label mb-5 relative">Get started today</p>
             <h2 className="font-display font-black text-text relative mb-5" style={{ fontSize: 'clamp(2.25rem,5vw,3.75rem)', letterSpacing: '-0.04em', lineHeight: '0.95' }}>
               Your first challenge<br />is free.
@@ -351,8 +351,8 @@ export default function Landing() {
       <footer className="border-t border-border py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md bg-amber flex items-center justify-center">
-              <IcAward size={12} className="text-bg" />
+            <div className="w-6 h-6 rounded-md bg-blue flex items-center justify-center">
+              <IcAward size={12} className="text-white" />
             </div>
             <span className="font-display font-black text-text tracking-tight" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </div>

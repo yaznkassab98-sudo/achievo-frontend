@@ -4,17 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg:      { DEFAULT: '#07080F', 2: '#0D0F1C', 3: '#141628' },
-        surface: { DEFAULT: '#111320', 2: '#181B2E', 3: '#1F2340' },
-        border:  { DEFAULT: '#1E2238', 2: '#272C4A' },
-        amber:   { DEFAULT: '#F5A623', light: '#FDC95A', dim: '#7A5110' },
-        coral:   { DEFAULT: '#FF5C3A', light: '#FF8C6A', dim: '#7A2515' },
-        text:    { DEFAULT: '#EDE8FF', muted: '#6B7299', faint: '#3A3E5C' },
-        green:   { stamp: '#22C55E', dim: '#14532D' },
+        bg:      { DEFAULT: '#F4F6FB', 2: '#FFFFFF', 3: '#EEF3FF' },
+        surface: { DEFAULT: '#FFFFFF', 2: '#F4F6FB', 3: '#EEF3FF' },
+        border:  { DEFAULT: '#E8ECF4', 2: '#D1D9EA' },
+        blue:    { DEFAULT: '#2767FF', light: '#EEF3FF', dim: '#1A4DB5' },
+        amber:   { DEFAULT: '#FF8A3D', light: '#FFF3EA', dim: '#C45E1A' },
+        coral:   { DEFAULT: '#FF4D3B', light: '#FF8070', dim: '#7A2515' },
+        text:    { DEFAULT: '#111827', muted: '#6B7A99', faint: '#9DAEC5' },
+        green:   { stamp: '#22C55E', dim: '#166534' },
+        navy:    { DEFAULT: '#0A1B33', 2: '#0F2444', 3: '#142D55' },
       },
       fontFamily: {
-        display: ['Syne', 'sans-serif'],
-        body:    ['DM Sans', 'sans-serif'],
+        display: ['Manrope', 'sans-serif'],
+        body:    ['Manrope', 'sans-serif'],
       },
       fontSize: {
         'display-xl': ['clamp(3.5rem, 10vw, 8rem)', { lineHeight: '0.95', letterSpacing: '-0.04em' }],
