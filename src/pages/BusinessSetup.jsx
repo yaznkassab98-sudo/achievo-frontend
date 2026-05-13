@@ -1,0 +1,193 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Award, ArrowRight, MapPin, Store, FileText, Check } from 'lucide-react'
+import api from '../api/client'
+import useToastStore from '../store/useToastStore'
+
+const CATEGORIES = ['cafe', 'restaurant', 'salon', 'hotel', 'gym', 'clinic', 'retail', 'other']
+
+const STEPS = [
+  { n: 1, label: 'Your business' },
+  { n: 2, label: 'Details' },
+  { n: 3, label: 'Done' },
+]
+
+export default function BusinessSetup() {
+  const navigate = useNavigate()
+  const { toast } = useToastStore()
+  const [step, setStep] = useState(1)
+  const [cities, setCities] = useState([])
+  const [saving, setSaving] = useState(false)
+  const [created, setCreated] = useState(null)
+
+  const [form, setForm] = useState({
+    name: '', cityId: '', category: 'cafe',
+    description: '', address: '', phone: '', website: '',
+  })
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  useEffect(() => {
+    api.get('/cities').then(r => setCities(r.data))
+  }, [])
+
+  const submit = async () => {
+    setSaving(true)
+    try {
+      const { data } = await api.post('/businesses', form)
+      setCreated(data)
+      setStep(3)
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to create business', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md">
+        <div className="flex items-center gap-2 font-display font-bold text-lg text-text mb-8">
+          <div className="w-8 h-8 rounded-lg bg-amber flex items-center justify-center">
+            <Award size={16} className="text-bg" />
+          </div>
+          Achievo
+        </div>
+
+        {/* STEP INDICATOR */}
+        <div className="flex items-center gap-2 mb-8">
+          {STEPS.map((s, i) => (
+            <div key={s.n} className="flex items-center gap-2 flex-1">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all
+                ${step > s.n ? 'bg-green-stamp text-white' : step === s.n ? 'bg-amber text-bg' : 'bg-surface-2 text-text-muted'}`}>
+                {step > s.n ? <Check size={12} /> : s.n}
+              </div>
+              <span className={`text-xs font-medium whitespace-nowrap ${step === s.n ? 'text-text' : 'text-text-muted'}`}>{s.label}</span>
+              {i < STEPS.length - 1 && <div className={`h-px flex-1 ${step > s.n ? 'bg-green-stamp/40' : 'bg-border'}`} />}
+            </div>
+          ))}
+        </div>
+
+        {/* STEP 1 */}
+        {step === 1 && (
+          <div className="card p-6 flex flex-col gap-5">
+            <div>
+              <h1 className="font-display font-bold text-2xl text-text mb-1">Set up your business</h1>
+              <p className="text-text-muted text-sm">This takes 2 minutes. You can edit everything later.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">Business name</label>
+              <div className="relative">
+                <Store size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input className="input pl-9" placeholder="e.g. Karaköy Café" value={form.name} onChange={e => set('name', e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">City</label>
+              <div className="relative">
+                <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                <select className="input pl-9" value={form.cityId} onChange={e => set('cityId', e.target.value)}>
+                  <option value="">Select your city...</option>
+                  {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-text-muted mb-2">Category</label>
+              <div className="grid grid-cols-4 gap-2">
+                {CATEGORIES.map(cat => (
+                  <button key={cat} type="button" onClick={() => set('category', cat)}
+                    className={`py-2 px-1 rounded-xl text-xs font-medium capitalize transition-all
+                      ${form.category === cat ? 'bg-amber text-bg font-bold' : 'bg-surface-2 text-text-muted hover:text-text border border-border hover:border-amber/30'}`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button onClick={() => setStep(2)} disabled={!form.name || !form.cityId}
+              className="btn-primary justify-center disabled:opacity-40">
+              Next <ArrowRight size={15} />
+            </button>
+          </div>
+        )}
+
+        {/* STEP 2 */}
+        {step === 2 && (
+          <div className="card p-6 flex flex-col gap-5">
+            <div>
+              <h1 className="font-display font-bold text-2xl text-text mb-1">Add more details</h1>
+              <p className="text-text-muted text-sm">Help customers find you. All optional — you can add these later.</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">Description</label>
+              <div className="relative">
+                <FileText size={15} className="absolute left-3.5 top-3.5 text-text-muted" />
+                <textarea className="input pl-9 resize-none" rows={3} placeholder="Tell customers what makes you special..."
+                  value={form.description} onChange={e => set('description', e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-text-muted mb-1.5">Address</label>
+              <input className="input" placeholder="Street, district" value={form.address} onChange={e => set('address', e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">Phone</label>
+                <input className="input" type="tel" placeholder="+90 5XX..." value={form.phone} onChange={e => set('phone', e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">Website</label>
+                <input className="input" type="url" placeholder="https://..." value={form.website} onChange={e => set('website', e.target.value)} />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button onClick={() => setStep(1)} className="btn-secondary flex-1 justify-center">Back</button>
+              <button onClick={submit} disabled={saving} className="btn-primary flex-1 justify-center">
+                {saving ? 'Creating...' : 'Create business'} {!saving && <ArrowRight size={15} />}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3 — success */}
+        {step === 3 && created && (
+          <div className="card p-8 flex flex-col items-center text-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-green-stamp/20 flex items-center justify-center">
+              <Check size={28} className="text-green-stamp" />
+            </div>
+            <div>
+              <h1 className="font-display font-bold text-2xl text-text mb-1">You're live! 🎉</h1>
+              <p className="text-text-muted text-sm">
+                <span className="text-amber font-medium">{created.name}</span> is now on Achievo.<br />
+                Your business code is <span className="font-mono text-amber">{created.slug}</span>
+              </p>
+            </div>
+
+            <div className="w-full bg-surface-2 rounded-xl p-4 text-left">
+              <p className="text-xs text-text-muted mb-2">What's next:</p>
+              <ul className="flex flex-col gap-2">
+                {['Create your first challenge', 'Add staff members', 'Download your QR code'].map((item, i) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-text">
+                    <span className="w-5 h-5 rounded-full bg-amber/10 text-amber text-xs font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <button onClick={() => navigate('/dashboard')} className="btn-primary w-full justify-center">
+              Go to dashboard <ArrowRight size={15} />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
