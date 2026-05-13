@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Save } from 'lucide-react'
+import { IcArrowLeft, IcSave } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
@@ -14,10 +14,7 @@ export default function EditProfile() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ fullName: '', phone: '', cityId: '' })
 
-  useEffect(() => {
-    api.get('/cities').then(r => setCities(r.data))
-  }, [])
-
+  useEffect(() => { api.get('/cities').then(r => setCities(r.data)) }, [])
   useEffect(() => {
     if (user) setForm({ fullName: user.full_name || '', phone: user.phone || '', cityId: user.city_id || '' })
   }, [user])
@@ -25,8 +22,7 @@ export default function EditProfile() {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const submit = async (e) => {
-    e.preventDefault()
-    setSaving(true)
+    e.preventDefault(); setSaving(true)
     try {
       await api.put('/auth/profile', form)
       await fetchMe()
@@ -34,17 +30,15 @@ export default function EditProfile() {
       navigate('/wallet')
     } catch (err) {
       toast(err.response?.data?.error || 'Failed to update', 'error')
-    } finally {
-      setSaving(false)
-    }
+    } finally { setSaving(false) }
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      <nav className="sticky top-0 z-40 border-b border-border/50 backdrop-blur-xl bg-bg/90">
+    <div className="min-h-screen pb-28">
+      <nav className="sticky top-0 z-40 border-b border-border/50 backdrop-blur-2xl bg-bg/90">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center gap-3">
-          <Link to="/wallet" className="p-2 text-text-muted hover:text-text transition-colors">
-            <ArrowLeft size={18} />
+          <Link to="/wallet" className="p-2 text-text-muted hover:text-text transition-colors rounded-xl hover:bg-surface-2 group">
+            <IcArrowLeft size={18} className="group-hover:-translate-x-0.5 transition-transform" />
           </Link>
           <span className="font-display font-bold text-text">Edit Profile</span>
         </div>
@@ -52,11 +46,11 @@ export default function EditProfile() {
 
       <div className="max-w-lg mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-amber/20 flex items-center justify-center font-display font-bold text-2xl text-amber">
+          <div className="w-16 h-16 rounded-2xl bg-amber/20 border border-amber/25 flex items-center justify-center font-display font-black text-2xl text-amber">
             {user?.full_name?.[0]?.toUpperCase()}
           </div>
           <div>
-            <p className="font-display font-bold text-xl text-text">{user?.full_name}</p>
+            <p className="font-display font-black text-text" style={{ fontSize: '1.25rem', letterSpacing: '-0.02em' }}>{user?.full_name}</p>
             <p className="text-text-muted text-sm">{user?.email}</p>
           </div>
         </div>
@@ -78,7 +72,7 @@ export default function EditProfile() {
             </select>
           </div>
           <button type="submit" disabled={saving} className="btn-primary justify-center mt-2">
-            <Save size={15} /> {saving ? 'Saving...' : 'Save changes'}
+            <IcSave size={15} /> {saving ? 'Saving...' : 'Save changes'}
           </button>
         </form>
       </div>
