@@ -53,7 +53,7 @@ function PlanCard({ plan, annual }) {
           </li>
         ))}
       </ul>
-      <Link to="/auth?role=business_owner" className="btn-primary justify-center text-sm">Get started</Link>
+      <Link to="/auth?mode=signup" className="btn-primary justify-center text-sm">Get started</Link>
     </div>
   )
   return (
@@ -74,7 +74,7 @@ function PlanCard({ plan, annual }) {
           </li>
         ))}
       </ul>
-      <Link to="/auth?role=business_owner" className="btn-secondary justify-center text-sm">
+      <Link to="/auth?mode=signup" className="btn-secondary justify-center text-sm">
         {plan.price === 0 ? 'Start for free' : 'Get started'}
       </Link>
     </div>
@@ -103,7 +103,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/auth" className="text-sm hidden sm:block transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.5)' }}>Sign in</Link>
-            <Link to="/auth?role=business_owner" className="btn-primary text-sm px-4 py-2.5">
+            <Link to="/auth?mode=signup" className="btn-primary text-sm px-4 py-2.5">
               Start free <IcArrowRight size={14} />
             </Link>
           </div>
@@ -126,7 +126,7 @@ export default function Landing() {
             <div>
               <div className="inline-flex items-center gap-2 mb-8 text-xs px-3 py-1.5 font-display font-bold tracking-widest uppercase rounded-full"
                 style={{ background: 'rgba(39,103,255,0.18)', color: '#7BA7FF', border: '1px solid rgba(39,103,255,0.3)' }}>
-                <IcMapPin size={11} /> Now live · Istanbul
+                <IcZap size={11} /> Now live worldwide
               </div>
 
               <h1 className="font-display font-black text-white mb-6" style={{ fontSize: 'clamp(3rem, 7.5vw, 6rem)', lineHeight: '0.93', letterSpacing: '-0.04em' }}>
@@ -139,13 +139,13 @@ export default function Landing() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link to="/auth?role=business_owner" className="btn-primary text-base px-8 py-3.5">
+                <Link to="/auth?mode=signup" className="btn-primary text-base px-8 py-3.5">
                   Start free — no card needed <IcArrowRight size={16} />
                 </Link>
                 <Link to="/browse"
                   className="inline-flex items-center gap-2 font-display font-bold px-8 py-3.5 rounded-xl transition-all duration-200 active:scale-95 text-base"
                   style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  Browse Istanbul <IcMapPin size={15} />
+                  Browse businesses <IcMapPin size={15} />
                 </Link>
               </div>
 
@@ -482,10 +482,10 @@ export default function Landing() {
             </span>
           </h2>
           <p className="text-lg mb-10" style={{ color: 'rgba(255,255,255,0.45)' }}>No credit card. No setup fees. Start in minutes.</p>
-          <Link to="/auth?role=business_owner" className="btn-primary text-base px-12 py-4 inline-flex">
+          <Link to="/auth?mode=signup" className="btn-primary text-base px-12 py-4 inline-flex">
             Add your business <IcArrowRight size={16} />
           </Link>
-          <p className="mt-8 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Trusted by 500+ businesses across Istanbul</p>
+          <p className="mt-8 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>Trusted by 500+ businesses in 29 cities worldwide</p>
         </div>
       </section>
 
@@ -500,7 +500,7 @@ export default function Landing() {
                 </div>
                 <span className="font-display font-black text-white" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
               </div>
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>City loyalty, simplified. Built for cafés, restaurants, salons, and hotels.</p>
+              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>Loyalty that travels with you. Built for cafés, restaurants, salons, and hotels worldwide.</p>
             </div>
             {[
               { title: 'Product', links: ['Browse businesses', 'For business owners', 'Pricing', 'How it works'] },
@@ -517,7 +517,7 @@ export default function Landing() {
           </div>
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.2)' }}>© 2026 Achievo. All rights reserved.</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>Made in Istanbul 🇹🇷</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>Built for businesses everywhere 🌍</p>
           </div>
         </div>
       </footer>
