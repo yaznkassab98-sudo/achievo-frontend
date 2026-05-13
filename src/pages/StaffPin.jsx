@@ -23,7 +23,7 @@ export default function StaffPin() {
     setSearching(true)
     try {
       const { data: biz } = await api.get(`/businesses/slug/${slug}`)
-      const { data: pendingList } = await api.get(`/completions/pending/${biz.id}`)
+      const { data: pendingList } = await api.get(`/completions/staff-pending/${biz.id}`)
       setBizId(biz.id)
       setBizName(biz.name)
       setPending(pendingList)

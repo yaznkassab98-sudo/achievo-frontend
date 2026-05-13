@@ -107,8 +107,11 @@ export default function Dashboard() {
   }, [tab, biz])
 
   useEffect(() => {
+    let bizData = null
     api.get('/businesses/mine').then(r => {
+      bizData = r.data
       setBiz(r.data)
+      if (r.data.qr_code_url) setQrUrl(r.data.qr_code_url)
       return Promise.all([
         api.get(`/challenges/business/${r.data.id}`),
         api.get(`/staff/${r.data.id}`),
@@ -119,7 +122,6 @@ export default function Dashboard() {
       setStaff(st.data)
       setPending(pe.data)
       setLoading(false)
-      if (r.data.qr_code_url) setQrUrl(r.data.qr_code_url)
     }).catch((err) => {
       if (err.response?.status === 404) {
         navigate('/setup')
