@@ -1,19 +1,47 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   IcAward, IcBarChart, IcUsers, IcQr, IcPlus, IcPencil, IcTrash,
   IcLogOut, IcBell, IcCheck, IcX, IcCopy, IcChevronDown, IcChevronUp,
+  IcCamera, IcSave, IcStar,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
 
 const TABS = [
-  { id: 'overview',    label: 'Overview',    icon: IcBarChart },
-  { id: 'challenges',  label: 'Challenges',  icon: IcAward },
-  { id: 'staff',       label: 'Staff',       icon: IcUsers },
-  { id: 'qr',          label: 'QR Code',     icon: IcQr },
+  { id: 'overview',   label: 'Overview',   icon: IcBarChart },
+  { id: 'challenges', label: 'Challenges', icon: IcAward },
+  { id: 'staff',      label: 'Staff',      icon: IcUsers },
+  { id: 'qr',         label: 'QR Code',    icon: IcQr },
+  { id: 'settings',   label: 'Settings',   icon: IcPencil },
 ]
+
+const resizeImage = (file, w, h) => new Promise((resolve) => {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      const srcRatio = img.width / img.height
+      const dstRatio = w / h
+      let sx, sy, sw, sh
+      if (srcRatio > dstRatio) {
+        sh = img.height; sw = img.height * dstRatio
+        sx = (img.width - sw) / 2; sy = 0
+      } else {
+        sw = img.width; sh = img.width / dstRatio
+        sx = 0; sy = (img.height - sh) / 2
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h)
+      resolve(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.src = e.target.result
+  }
+  reader.readAsDataURL(file)
+})
 
 function ChallengeForm({ biz, onSave, initial, onCancel }) {
   const [f, setF] = useState(initial || { title: '', description: '', type: 'review', rewardTitle: '', rewardType: 'free_item', pointsValue: 100 })
@@ -77,6 +105,41 @@ function ChallengeForm({ biz, onSave, initial, onCancel }) {
   )
 }
 
+function MiniBarChart({ daily }) {
+  const last30 = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (29 - i))
+    return d.toISOString().split('T')[0]
+  })
+
+  const dataMap = {}
+  daily.forEach(row => { dataMap[row.date] = parseInt(row.count) })
+
+  const counts = last30.map(day => dataMap[day] || 0)
+  const maxVal = Math.max(...counts, 1)
+
+  return (
+    <div className="flex items-end gap-0.5 h-16 w-full">
+      {counts.map((count, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full group relative">
+          <div
+            className="w-full rounded-sm transition-all"
+            style={{
+              height: `${Math.max((count / maxVal) * 100, count > 0 ? 8 : 2)}%`,
+              backgroundColor: count > 0 ? '#2767FF' : 'rgba(39,103,255,0.12)',
+            }}
+          />
+          {count > 0 && (
+            <div className="absolute bottom-full mb-1 bg-bg border border-border rounded-lg px-2 py-1 text-xs font-mono text-text opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+              {count}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { user, logout } = useAuthStore()
   const { toast } = useToastStore()
@@ -93,6 +156,13 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false)
   const [qrUrl, setQrUrl] = useState(null)
   const [qrLoading, setQrLoading] = useState(false)
+  const [stats, setStats] = useState(null)
+  const [settingsForm, setSettingsForm] = useState(null)
+  const [settingsSaving, setSettingsSaving] = useState(false)
+  const [logoPreview, setLogoPreview] = useState(null)
+  const [coverPreview, setCoverPreview] = useState(null)
+  const logoRef = useRef(null)
+  const coverRef = useRef(null)
 
   useEffect(() => {
     if (tab === 'qr' && biz && !qrUrl) {
@@ -105,11 +175,31 @@ export default function Dashboard() {
   }, [tab, biz])
 
   useEffect(() => {
+    if (tab === 'overview' && biz && !stats) {
+      api.get(`/businesses/${biz.id}/stats`)
+        .then(r => setStats(r.data))
+        .catch(() => {})
+    }
+  }, [tab, biz])
+
+  useEffect(() => {
     let bizData = null
     api.get('/businesses/mine').then(r => {
       bizData = r.data
       setBiz(r.data)
       if (r.data.qr_code_url) setQrUrl(r.data.qr_code_url)
+      setSettingsForm({
+        name: r.data.name || '',
+        description: r.data.description || '',
+        category: r.data.category || 'other',
+        address: r.data.address || '',
+        phone: r.data.phone || '',
+        website: r.data.website || '',
+        logoUrl: null,
+        coverUrl: null,
+      })
+      setLogoPreview(r.data.logo_url || null)
+      setCoverPreview(r.data.cover_url || null)
       return Promise.all([
         api.get(`/challenges/business/${r.data.id}`),
         api.get(`/staff/${r.data.id}`),
@@ -152,6 +242,44 @@ export default function Dashboard() {
     setCopied(true); setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return
+    const b64 = await resizeImage(file, 200, 200)
+    setLogoPreview(b64)
+    setSettingsForm(f => ({ ...f, logoUrl: b64 }))
+  }
+
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return
+    const b64 = await resizeImage(file, 1200, 400)
+    setCoverPreview(b64)
+    setSettingsForm(f => ({ ...f, coverUrl: b64 }))
+  }
+
+  const saveSettings = async (e) => {
+    e.preventDefault()
+    setSettingsSaving(true)
+    try {
+      const { data } = await api.put(`/businesses/${biz.id}`, {
+        name: settingsForm.name,
+        description: settingsForm.description || null,
+        category: settingsForm.category,
+        address: settingsForm.address || null,
+        phone: settingsForm.phone || null,
+        website: settingsForm.website || null,
+        logoUrl: settingsForm.logoUrl || null,
+        coverUrl: settingsForm.coverUrl || null,
+      })
+      setBiz(prev => ({ ...prev, ...data }))
+      setSettingsForm(f => ({ ...f, logoUrl: null, coverUrl: null }))
+      toast('Business updated', 'success')
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to update', 'error')
+    } finally {
+      setSettingsSaving(false)
+    }
+  }
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-bg">
       <div className="w-8 h-8 border-2 border-blue border-t-transparent rounded-full animate-spin" />
@@ -171,8 +299,14 @@ export default function Dashboard() {
             <span className="font-display font-black text-white" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </div>
           <div className="rounded-xl p-3" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <p className="font-display font-bold text-white text-sm truncate">{biz.name}</p>
-            <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-2 mb-1">
+              {logoPreview
+                ? <img src={logoPreview} className="w-6 h-6 rounded-lg object-cover flex-shrink-0" alt="" />
+                : <div className="w-6 h-6 rounded-lg bg-blue/30 flex items-center justify-center text-white text-xs font-black flex-shrink-0">{biz.name?.[0]}</div>
+              }
+              <p className="font-display font-bold text-white text-sm truncate">{biz.name}</p>
+            </div>
+            <div className="flex items-center justify-between">
               <p className="text-xs font-mono truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{biz.slug}</p>
               <span className="badge-blue text-[10px] px-2 py-0.5">{biz.plan}</span>
             </div>
@@ -225,13 +359,11 @@ export default function Dashboard() {
         {/* OVERVIEW */}
         {tab === 'overview' && (
           <div className="flex flex-col gap-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em' }}>
-                  Overview
-                </h1>
-                <p className="text-text-muted text-sm">Welcome back, {user?.full_name?.split(' ')[0]}</p>
-              </div>
+            <div>
+              <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em' }}>
+                Overview
+              </h1>
+              <p className="text-text-muted text-sm">Welcome back, {user?.full_name?.split(' ')[0]}</p>
             </div>
 
             {/* Stats */}
@@ -249,20 +381,43 @@ export default function Dashboard() {
                 <p className="text-text-muted text-xs mt-1">Pending</p>
               </div>
               <div className="stat-card stat-card-amber">
-                <p className="stat-num" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
-                  {staff.length}
+                <p className="stat-num text-amber" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {stats ? parseInt(stats.unique_customers) : '—'}
                 </p>
-                <p className="text-text-muted text-xs mt-1">Staff members</p>
+                <p className="text-text-muted text-xs mt-1">Customers</p>
               </div>
               <div className="stat-card stat-card-green">
-                <p className="stat-num text-green-stamp capitalize" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
-                  {biz.plan}
+                <p className="stat-num text-green-stamp" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {stats ? parseInt(stats.total_completions) : '—'}
                 </p>
-                <p className="text-text-muted text-xs mt-1">Current plan</p>
+                <p className="text-text-muted text-xs mt-1">Completions</p>
               </div>
             </div>
 
-            {/* Pending */}
+            {/* Activity chart */}
+            <div className="card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="font-display font-bold text-text text-sm">Activity</p>
+                  <p className="text-text-muted text-xs mt-0.5">Confirmed completions · last 30 days</p>
+                </div>
+                {stats && (
+                  <div className="text-right">
+                    <p className="font-display font-black text-blue text-lg" style={{ letterSpacing: '-0.03em' }}>
+                      {stats.daily.reduce((s, d) => s + parseInt(d.count), 0)}
+                    </p>
+                    <p className="text-text-muted text-xs">this month</p>
+                  </div>
+                )}
+              </div>
+              {stats ? (
+                <MiniBarChart daily={stats.daily} />
+              ) : (
+                <div className="h-16 bg-surface-2 rounded-lg animate-pulse" />
+              )}
+            </div>
+
+            {/* Pending confirmations */}
             {pending.length > 0 && (
               <div>
                 <div className="flex items-center gap-2.5 mb-4">
@@ -461,6 +616,110 @@ export default function Dashboard() {
                 ))}
               </ul>
             </div>
+          </div>
+        )}
+
+        {/* SETTINGS */}
+        {tab === 'settings' && settingsForm && (
+          <div className="flex flex-col gap-8 max-w-xl">
+            <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em' }}>Settings</h1>
+
+            {/* Cover photo */}
+            <div>
+              <p className="text-xs font-semibold text-text-muted mb-3">Cover photo</p>
+              <div
+                className="relative w-full h-32 rounded-2xl overflow-hidden cursor-pointer border-2 border-dashed border-border hover:border-blue/40 transition-colors group"
+                onClick={() => coverRef.current?.click()}
+                style={{ background: coverPreview ? 'none' : 'linear-gradient(135deg, #0A1B33, #142D55)' }}
+              >
+                {coverPreview
+                  ? <img src={coverPreview} className="w-full h-full object-cover" alt="" />
+                  : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+                        <defs><pattern id="cp" width="40" height="40" patternUnits="userSpaceOnUse">
+                          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2767FF" strokeWidth="1"/>
+                        </pattern></defs>
+                        <rect width="100%" height="100%" fill="url(#cp)"/>
+                      </svg>
+                    </div>
+                  )
+                }
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="flex items-center gap-2 text-white text-sm font-display font-bold">
+                    <IcCamera size={16} /> Change cover
+                  </div>
+                </div>
+              </div>
+              <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+            </div>
+
+            {/* Logo */}
+            <div>
+              <p className="text-xs font-semibold text-text-muted mb-3">Logo</p>
+              <div className="flex items-center gap-4">
+                <div
+                  className="relative w-20 h-20 rounded-2xl overflow-hidden cursor-pointer border-2 border-border hover:border-blue/40 transition-colors group flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #1F2340, #111320)' }}
+                  onClick={() => logoRef.current?.click()}
+                >
+                  {logoPreview
+                    ? <img src={logoPreview} className="w-full h-full object-cover" alt="" />
+                    : <div className="w-full h-full flex items-center justify-center font-display font-black text-2xl text-text-muted">{biz.name?.[0]}</div>
+                  }
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <IcCamera size={18} className="text-white" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-text mb-1">Business logo</p>
+                  <p className="text-xs text-text-muted">Square image, min 200×200px</p>
+                  <button type="button" className="btn-secondary text-xs px-3 py-1.5 mt-2" onClick={() => logoRef.current?.click()}>
+                    <IcCamera size={12} /> Upload
+                  </button>
+                </div>
+              </div>
+              <input ref={logoRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+            </div>
+
+            {/* Business info */}
+            <form onSubmit={saveSettings} className="card p-6 flex flex-col gap-4">
+              <h2 className="font-display font-bold text-text">Business info</h2>
+              <div>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Business name</label>
+                <input className="input" value={settingsForm.name} onChange={e => setSettingsForm(f => ({ ...f, name: e.target.value }))} required />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Category</label>
+                <select className="input" value={settingsForm.category} onChange={e => setSettingsForm(f => ({ ...f, category: e.target.value }))}>
+                  {['restaurant','cafe','retail','beauty','fitness','health','entertainment','other'].map(c => (
+                    <option key={c} value={c} className="capitalize">{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Description</label>
+                <textarea className="input min-h-[80px] resize-y" placeholder="Tell customers about your business..."
+                  value={settingsForm.description} onChange={e => setSettingsForm(f => ({ ...f, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Phone</label>
+                  <input className="input" type="tel" placeholder="+1 555 000 0000" value={settingsForm.phone} onChange={e => setSettingsForm(f => ({ ...f, phone: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Website</label>
+                  <input className="input" type="url" placeholder="https://" value={settingsForm.website} onChange={e => setSettingsForm(f => ({ ...f, website: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Address</label>
+                <input className="input" placeholder="123 Main St, City" value={settingsForm.address} onChange={e => setSettingsForm(f => ({ ...f, address: e.target.value }))} />
+              </div>
+              <button type="submit" disabled={settingsSaving} className="btn-primary justify-center mt-2 disabled:opacity-40">
+                <IcSave size={15} /> {settingsSaving ? 'Saving...' : 'Save changes'}
+              </button>
+            </form>
           </div>
         )}
       </main>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { IcArrowLeft, IcMapPin, IcGlobe, IcPhone, IcCheck, IcClock, IcAward } from '../components/Icons'
+import { IcArrowLeft, IcMapPin, IcGlobe, IcPhone, IcCheck, IcClock, IcAward, IcStar } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
@@ -16,12 +16,12 @@ const TYPE_META = {
   custom:   { label: 'Custom',   color: '#FB923C' },
 }
 
-function ChallengeTicket({ challenge }) {
+function ChallengeTicket({ challenge, status }) {
   const { user } = useAuthStore()
   const { toast } = useToastStore()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [done, setDone] = useState(false)
+  const [localStatus, setLocalStatus] = useState(status || null)
 
   const meta = TYPE_META[challenge.type] || TYPE_META.custom
 
@@ -30,7 +30,7 @@ function ChallengeTicket({ challenge }) {
     setLoading(true)
     try {
       await api.post('/completions', { challengeId: challenge.id })
-      setDone(true)
+      setLocalStatus('pending')
       toast('Challenge submitted! Waiting for staff confirmation.', 'success')
     } catch (err) {
       toast(err.response?.data?.error || 'Error submitting', 'error')
@@ -38,6 +38,9 @@ function ChallengeTicket({ challenge }) {
       setLoading(false)
     }
   }
+
+  const isPending = localStatus === 'pending'
+  const isDone = localStatus === 'confirmed' || localStatus === 'claimed'
 
   return (
     <div className="ticket">
@@ -57,6 +60,11 @@ function ChallengeTicket({ challenge }) {
               </span>
             )}
           </div>
+          {isDone && (
+            <div className="w-7 h-7 rounded-full bg-green-stamp/15 flex items-center justify-center flex-shrink-0">
+              <IcCheck size={13} className="text-green-stamp" />
+            </div>
+          )}
         </div>
 
         <h3 className="font-display font-black text-text mb-2" style={{ fontSize: 'clamp(1.1rem,3vw,1.4rem)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
@@ -80,9 +88,13 @@ function ChallengeTicket({ challenge }) {
         )}
 
         <div className="mt-4">
-          {done ? (
-            <div className="flex items-center gap-2.5 bg-green-stamp/10 border border-green-stamp/25 text-green-stamp rounded-xl px-4 py-3 text-sm font-display font-bold animate-stamp">
-              <IcCheck size={16} /> Submitted — waiting for staff
+          {isDone ? (
+            <div className="flex items-center gap-2.5 bg-green-stamp/10 border border-green-stamp/25 text-green-stamp rounded-xl px-4 py-3 text-sm font-display font-bold">
+              <IcCheck size={16} /> Completed — reward unlocked
+            </div>
+          ) : isPending ? (
+            <div className="flex items-center gap-2.5 bg-amber/10 border border-amber/25 text-amber rounded-xl px-4 py-3 text-sm font-display font-bold">
+              <IcClock size={16} /> Waiting for staff confirmation
             </div>
           ) : (
             <button onClick={complete} disabled={loading}
@@ -98,14 +110,28 @@ function ChallengeTicket({ challenge }) {
 
 export default function BusinessPage() {
   const { slug } = useParams()
+  const { user } = useAuthStore()
   const [biz, setBiz] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [progressMap, setProgressMap] = useState({})
 
   useEffect(() => {
     api.get(`/businesses/slug/${slug}`).then(r => {
       setBiz(r.data); setLoading(false)
     }).catch(() => setLoading(false))
   }, [slug])
+
+  useEffect(() => {
+    if (user && biz?.id) {
+      api.get(`/completions/progress/${biz.id}`)
+        .then(r => {
+          const map = {}
+          r.data.forEach(row => { map[row.challenge_id] = row.status })
+          setProgressMap(map)
+        })
+        .catch(() => {})
+    }
+  }, [user, biz?.id])
 
   if (loading) return (
     <div className="min-h-screen pb-28">
@@ -125,6 +151,9 @@ export default function BusinessPage() {
   )
 
   if (!biz) return <NotFound />
+
+  const completed = biz.challenges?.filter(c => ['confirmed','claimed'].includes(progressMap[c.id])).length || 0
+  const total = biz.challenges?.length || 0
 
   return (
     <div className="min-h-screen">
@@ -158,7 +187,7 @@ export default function BusinessPage() {
             style={{ background: 'linear-gradient(135deg, #1F2340, #111320)' }}>
             {biz.logo_url ? <img src={biz.logo_url} className="w-full h-full object-cover" alt="" /> : (biz.name?.[0] || '?')}
           </div>
-          <div className="pb-1">
+          <div className="pb-1 flex-1">
             <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,4vw,2rem)', letterSpacing: '-0.03em', lineHeight: 1 }}>
               {biz.name}
             </h1>
@@ -171,7 +200,7 @@ export default function BusinessPage() {
         )}
 
         {/* LINKS */}
-        <div className="flex flex-wrap gap-2 mb-10">
+        <div className="flex flex-wrap gap-2 mb-6">
           {biz.address && (
             <a href={biz.google_maps_url || '#'} target="_blank" rel="noreferrer"
               className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
@@ -191,15 +220,34 @@ export default function BusinessPage() {
           )}
         </div>
 
+        {/* PROGRESS SUMMARY — only if user is logged in and there are challenges */}
+        {user && total > 0 && (
+          <div className="card p-4 mb-8 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber/10 flex items-center justify-center flex-shrink-0">
+              <IcStar size={18} className="text-amber" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-display font-bold text-text">Your progress</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex-1 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                  <div className="h-full rounded-full bg-amber transition-all duration-500"
+                    style={{ width: total > 0 ? `${(completed / total) * 100}%` : '0%' }} />
+                </div>
+                <span className="text-xs text-text-muted font-mono flex-shrink-0">{completed}/{total}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* CHALLENGES */}
         <div>
           <div className="flex items-center gap-3 mb-6">
             <IcAward size={16} className="text-amber" />
             <h2 className="font-display font-bold text-lg text-text">Active challenges</h2>
-            <span className="badge-amber text-xs">{biz.challenges?.length || 0}</span>
+            <span className="badge-amber text-xs">{total}</span>
           </div>
 
-          {!biz.challenges?.length ? (
+          {!total ? (
             <div className="card p-10 text-center text-text-muted">
               <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-4">
                 <IcAward size={24} className="text-text-faint" />
@@ -209,7 +257,9 @@ export default function BusinessPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-5">
-              {biz.challenges.map(c => <ChallengeTicket key={c.id} challenge={c} />)}
+              {biz.challenges.map(c => (
+                <ChallengeTicket key={c.id} challenge={c} status={progressMap[c.id] || null} />
+              ))}
             </div>
           )}
         </div>
