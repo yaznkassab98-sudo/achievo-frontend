@@ -21,7 +21,7 @@ export default {
         'display-lg': ['clamp(2.5rem, 6vw, 5rem)',  { lineHeight: '1',    letterSpacing: '-0.035em' }],
         'display-md': ['clamp(1.75rem, 4vw, 3rem)',  { lineHeight: '1.05', letterSpacing: '-0.025em' }],
       },
-      backgroundOpacity: {
+      opacity: {
         8: '0.08',
         12: '0.12',
       },
