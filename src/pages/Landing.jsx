@@ -72,22 +72,22 @@ export default function Landing() {
   return (
     <div className="min-h-screen font-body overflow-x-hidden">
 
-      {/* NAV */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-border/40 backdrop-blur-2xl bg-bg/75">
+      {/* NAV — dark on hero */}
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-2xl" style={{ background: 'rgba(10,27,51,0.9)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-blue flex items-center justify-center">
               <IcAward size={13} className="text-white" />
             </div>
-            <span className="font-display font-black text-text tracking-tight" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
+            <span className="font-display font-black text-white tracking-tight" style={{ letterSpacing: '-0.02em' }}>Achievo</span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-text-muted font-body">
-            <a href="#how" className="hover:text-text transition-colors">How it works</a>
-            <a href="#pricing" className="hover:text-text transition-colors">Pricing</a>
-            <a href="#reviews" className="hover:text-text transition-colors">Reviews</a>
+          <div className="hidden md:flex items-center gap-8 text-sm font-body" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <a href="#how" className="hover:text-white transition-colors">How it works</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+            <a href="#reviews" className="hover:text-white transition-colors">Reviews</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/auth" className="text-sm text-text-muted hover:text-text transition-colors hidden sm:block">Sign in</Link>
+            <Link to="/auth" className="text-sm hidden sm:block transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.55)' }}>Sign in</Link>
             <Link to="/auth?role=business_owner" className="btn-primary text-sm px-4 py-2.5">
               Start free <IcArrowRight size={14} />
             </Link>
@@ -95,92 +95,82 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="pt-36 pb-24 px-6">
-        <div className="max-w-6xl mx-auto">
+      {/* HERO — dark navy */}
+      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #0A1B33 0%, #0F2444 55%, #142D55 100%)', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+        {/* Grid pattern */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.04 }} xmlns="http://www.w3.org/2000/svg">
+          <defs><pattern id="hero-grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#2767FF" strokeWidth="1"/>
+          </pattern></defs>
+          <rect width="100%" height="100%" fill="url(#hero-grid)"/>
+        </svg>
+        {/* Glow blobs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(39,103,255,0.15) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(255,138,61,0.1) 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 max-w-6xl mx-auto px-6 pt-24 pb-20 w-full">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-6 items-center">
 
-            {/* LEFT — editorial headline */}
             <div>
-              <div className="inline-flex items-center gap-2 badge-blue mb-8 text-xs px-3 py-1.5 font-display font-bold tracking-widest uppercase">
+              <div className="inline-flex items-center gap-2 mb-8 text-xs px-3 py-1.5 font-display font-bold tracking-widest uppercase rounded-full"
+                style={{ background: 'rgba(39,103,255,0.2)', color: '#7BA7FF', border: '1px solid rgba(39,103,255,0.35)' }}>
                 <IcMapPin size={11} /> Now live · Istanbul
               </div>
 
-              <h1 className="font-display font-black text-text mb-6" style={{ fontSize: 'clamp(3.25rem, 8vw, 6.5rem)', lineHeight: '0.92', letterSpacing: '-0.04em' }}>
-                <span className="block">Turn every</span>
-                <span className="block text-blue">visit into</span>
-                <span className="block">loyalty.</span>
+              <h1 className="font-display font-black text-white mb-6" style={{ fontSize: 'clamp(3rem, 8vw, 6.5rem)', lineHeight: '0.92', letterSpacing: '-0.04em' }}>
+                <span className="block">Turn customers</span>
+                <span className="block" style={{ color: '#2767FF' }}>into regulars.</span>
               </h1>
 
-              <p className="text-text-muted text-lg leading-relaxed mb-10 max-w-md">
+              <p className="text-lg leading-relaxed mb-10 max-w-md" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 Businesses create challenges. Customers earn real rewards. One platform for every café, salon, and restaurant in your city.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link to="/auth?role=business_owner" className="btn-primary text-base px-8 py-3.5">
-                  Add your business free <IcArrowRight size={16} />
+                  Start free <IcArrowRight size={16} />
                 </Link>
-                <Link to="/browse" className="btn-secondary text-base px-8 py-3.5">
+                <Link to="/browse" className="inline-flex items-center gap-2 font-display font-bold px-8 py-3.5 rounded-xl transition-all duration-200 active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.15)' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.12)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
                   Browse Istanbul <IcMapPin size={15} />
                 </Link>
               </div>
 
-              <div className="flex items-center gap-6 mt-10 pt-8 border-t border-border">
-                {[['500+', 'Businesses'], ['12k+', 'Rewards earned'], ['4.9', 'App rating']].map(([n, l]) => (
+              <div className="flex items-center gap-8 mt-10 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                {[['500+', 'Businesses'], ['12k+', 'Rewards earned'], ['4.9★', 'Rating']].map(([n, l]) => (
                   <div key={l}>
-                    <p className="font-display font-black text-text" style={{ fontSize: '1.5rem', letterSpacing: '-0.04em', lineHeight: 1 }}>{n}</p>
-                    <p className="text-text-faint text-xs mt-0.5">{l}</p>
+                    <p className="font-display font-black text-white" style={{ fontSize: '1.5rem', letterSpacing: '-0.04em', lineHeight: 1 }}>{n}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{l}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* RIGHT — stacked preview cards */}
+            {/* RIGHT — floating ticket cards on dark */}
             <div className="relative hidden lg:flex items-center justify-center h-[480px]">
-              <div className="absolute w-72 ticket animate-float" style={{ transform: 'rotate(-3deg) translate(-20px, 20px)', animationDelay: '0.2s' }}>
-                <div className="ticket-body">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="badge-muted text-xs">⭐ Review</span>
-                    <span className="badge-amber text-xs">+100 pts</span>
+              {[
+                { rotate: '-3deg', translate: '-20px, 20px', delay: '0.2s', title: 'Leave us a Google Review', biz: 'Karaköy Roasters · Café', type: '⭐ Review', pts: '+100 pts', reward: 'Free Cortado' },
+                { rotate: '2deg',  translate: '24px, -16px', delay: '0.8s', title: 'Visit 3 times this month',  biz: 'Studio Nişantaşı · Salon', type: '📍 Visit', pts: '+200 pts', reward: '30% off next cut' },
+                { rotate: '-1deg', translate: '8px, 60px',   delay: '1.4s', title: 'Refer a friend',            biz: 'Bosphorus Fit · Gym',    type: '👥 Refer', pts: '+300 pts', reward: 'Free PT Session' },
+              ].map((t, i) => (
+                <div key={i} className="absolute w-72 ticket animate-float"
+                  style={{ transform: `rotate(${t.rotate}) translate(${t.translate})`, animationDelay: t.delay }}>
+                  <div className="ticket-body">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="badge-muted text-xs">{t.type}</span>
+                      <span className="badge-amber text-xs">{t.pts}</span>
+                    </div>
+                    <p className="font-display font-bold text-text text-lg leading-tight">{t.title}</p>
+                    <p className="text-text-muted text-xs mt-1.5">{t.biz}</p>
                   </div>
-                  <p className="font-display font-bold text-text text-lg leading-tight">Leave us a Google Review</p>
-                  <p className="text-text-muted text-xs mt-1.5">Karaköy Roasters · Café</p>
-                </div>
-                <div className="ticket-reward">
-                  <p className="text-xs text-text-muted font-display uppercase tracking-widest mb-1">Reward</p>
-                  <p className="font-display font-bold text-amber">Free Cortado</p>
-                </div>
-              </div>
-
-              <div className="absolute w-72 ticket animate-float" style={{ transform: 'rotate(2deg) translate(24px, -16px)', animationDelay: '0.8s' }}>
-                <div className="ticket-body">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="badge-muted text-xs">📍 Visit</span>
-                    <span className="badge-amber text-xs">+200 pts</span>
+                  <div className="ticket-reward">
+                    <p className="text-xs text-text-muted font-display uppercase tracking-widest mb-1">Reward</p>
+                    <p className="font-display font-bold text-amber">{t.reward}</p>
                   </div>
-                  <p className="font-display font-bold text-text text-lg leading-tight">Visit 3 times this month</p>
-                  <p className="text-text-muted text-xs mt-1.5">Studio Nişantaşı · Salon</p>
                 </div>
-                <div className="ticket-reward">
-                  <p className="text-xs text-text-muted font-display uppercase tracking-widest mb-1">Reward</p>
-                  <p className="font-display font-bold text-amber">30% off next cut</p>
-                </div>
-              </div>
-
-              <div className="absolute w-72 ticket animate-float" style={{ transform: 'rotate(-1deg) translate(8px, 60px)', animationDelay: '1.4s' }}>
-                <div className="ticket-body">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="badge-muted text-xs">👥 Refer</span>
-                    <span className="badge-amber text-xs">+300 pts</span>
-                  </div>
-                  <p className="font-display font-bold text-text text-lg leading-tight">Refer a friend</p>
-                  <p className="text-text-muted text-xs mt-1.5">Bosphorus Fit · Gym</p>
-                </div>
-                <div className="ticket-reward">
-                  <p className="text-xs text-text-muted font-display uppercase tracking-widest mb-1">Reward</p>
-                  <p className="font-display font-bold text-amber">Free PT Session</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

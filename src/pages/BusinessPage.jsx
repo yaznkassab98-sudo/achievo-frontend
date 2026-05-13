@@ -134,11 +134,11 @@ export default function BusinessPage() {
           ? <img src={biz.cover_url} className="w-full h-full object-cover" alt="" />
           : (
             <div className="w-full h-full flex items-center justify-center" style={{
-              background: 'radial-gradient(ellipse at 30% 50%, rgba(245,166,35,0.15) 0%, transparent 60%)',
+              background: 'linear-gradient(135deg, #0A1B33 0%, #142D55 100%)',
             }}>
-              <svg className="absolute inset-0 w-full h-full opacity-[0.05]" xmlns="http://www.w3.org/2000/svg">
+              <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
                 <defs><pattern id="cg" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#F5A623" strokeWidth="1"/>
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#2767FF" strokeWidth="1"/>
                 </pattern></defs>
                 <rect width="100%" height="100%" fill="url(#cg)"/>
               </svg>
