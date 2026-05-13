@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   IcAward, IcEye, IcEyeOff, IcArrowRight, IcArrowLeft,
   IcMapPin, IcCheck, IcCamera, IcPhone, IcShield, IcSearch, IcX, IcZap,
+  IcStore, IcStar,
 } from '../components/Icons'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
@@ -100,15 +101,40 @@ function CityPickerModal({ cities, selected, onSelect, onClose }) {
 
 const STEP_LABELS = ['Account', 'Profile', 'Verify']
 
+const ROLE_OPTIONS = [
+  {
+    value: 'customer',
+    title: 'Member',
+    subtitle: 'I want to earn rewards',
+    description: 'Scan QR codes, complete challenges, and collect rewards at local businesses near you.',
+    icon: IcStar,
+    accent: '#2767FF',
+    bg: 'rgba(39,103,255,0.05)',
+    border: 'rgba(39,103,255,0.2)',
+    features: ['Earn points on every visit', 'Unlock exclusive rewards', 'Track your progress'],
+  },
+  {
+    value: 'business_owner',
+    title: 'Business',
+    subtitle: 'I want to grow my business',
+    description: 'Create loyalty challenges, retain customers, and grow your business with Achievo.',
+    icon: IcStore,
+    accent: '#FF8A3D',
+    bg: 'rgba(255,138,61,0.05)',
+    border: 'rgba(255,138,61,0.2)',
+    features: ['Create custom challenges', 'Staff confirmation system', 'Analytics dashboard'],
+  },
+]
+
 export default function Auth() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { login, signup, verifyOtp, loading } = useAuthStore()
   const { toast } = useToastStore()
 
-  const [mode, setMode] = useState('login')
+  const [mode, setMode] = useState(params.get('mode') === 'signup' ? 'signup' : 'login')
   const [role, setRole] = useState(params.get('role') || 'customer')
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(params.get('mode') === 'signup' ? 0 : 1)
   const [pendingUser, setPendingUser] = useState(null)
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState('')
@@ -255,7 +281,7 @@ export default function Auth() {
 
   const switchMode = (newMode) => {
     setMode(newMode)
-    setStep(1)
+    setStep(newMode === 'signup' ? 0 : 1)
     setError('')
     setOtp(['', '', '', '', '', ''])
   }
@@ -397,13 +423,95 @@ export default function Auth() {
           {/* ── SIGNUP WIZARD ── */}
           {mode === 'signup' && (
             <div>
+
+              {/* STEP 0 — Role picker */}
+              {step === 0 && (
+                <div className="animate-fade-up">
+                  <h1 className="font-display font-black text-text mb-1.5" style={{ fontSize: 'clamp(1.75rem,4vw,2.25rem)', letterSpacing: '-0.035em' }}>
+                    Join Achievo
+                  </h1>
+                  <p className="text-text-muted text-sm mb-8">What brings you here?</p>
+
+                  <div className="flex flex-col gap-3">
+                    {ROLE_OPTIONS.map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => { setRole(opt.value); setStep(1) }}
+                        className="group w-full text-left rounded-2xl border-2 p-5 transition-all duration-200 hover:-translate-y-0.5"
+                        style={{
+                          background: opt.bg,
+                          borderColor: opt.border,
+                          boxShadow: '0 1px 3px rgba(17,24,39,0.06)',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.borderColor = opt.accent; e.currentTarget.style.boxShadow = `0 8px 28px ${opt.accent}20` }}
+                        onMouseLeave={e => { e.currentTarget.style.borderColor = opt.border; e.currentTarget.style.boxShadow = '0 1px 3px rgba(17,24,39,0.06)' }}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110"
+                            style={{ background: `${opt.accent}18` }}>
+                            <opt.icon size={22} style={{ color: opt.accent }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="font-display font-black text-text text-lg" style={{ letterSpacing: '-0.02em' }}>{opt.title}</p>
+                              <span className="text-xs font-medium text-text-muted">{opt.subtitle}</span>
+                            </div>
+                            <p className="text-text-muted text-sm leading-relaxed mb-3">{opt.description}</p>
+                            <div className="flex flex-col gap-1">
+                              {opt.features.map(f => (
+                                <div key={f} className="flex items-center gap-2">
+                                  <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0"
+                                    style={{ background: `${opt.accent}20` }}>
+                                    <IcCheck size={8} style={{ color: opt.accent }} />
+                                  </div>
+                                  <span className="text-xs text-text-muted">{f}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <IcArrowRight size={18} style={{ color: opt.accent }} />
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-center text-text-muted text-sm mt-8">
+                    Already have an account?{' '}
+                    <button onClick={() => switchMode('login')} className="text-blue hover:underline font-semibold">
+                      Sign in
+                    </button>
+                  </p>
+                </div>
+              )}
+
+              {step > 0 && (
+              <div>
               <div className="flex items-center justify-between mb-8">
                 <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ background: role === 'business_owner' ? 'rgba(255,138,61,0.15)' : 'rgba(39,103,255,0.12)' }}>
+                      {role === 'business_owner'
+                        ? <IcStore size={11} style={{ color: '#FF8A3D' }} />
+                        : <IcStar size={11} style={{ color: '#2767FF' }} />
+                      }
+                    </div>
+                    <span className="text-xs font-display font-bold"
+                      style={{ color: role === 'business_owner' ? '#FF8A3D' : '#2767FF' }}>
+                      {role === 'business_owner' ? 'Business' : 'Member'}
+                    </span>
+                    <button onClick={() => setStep(0)} className="text-text-faint hover:text-text-muted transition-colors text-xs underline underline-offset-2 ml-0.5">
+                      change
+                    </button>
+                  </div>
                   <h1 className="font-display font-black text-text mb-0.5" style={{ fontSize: 'clamp(1.6rem,4vw,2.1rem)', letterSpacing: '-0.035em' }}>
                     {step === 1 ? 'Create account' : step === 2 ? 'Your profile' : 'Verify your email'}
                   </h1>
                   <p className="text-text-muted text-sm">
-                    {step === 1 ? 'Free forever for customers' : step === 2 ? 'Almost there — personalise your account' : `Code sent to ${pendingUser?.email}`}
+                    {step === 1 ? 'Takes less than 2 minutes' : step === 2 ? 'Personalise your account' : `Code sent to ${pendingUser?.email}`}
                   </p>
                 </div>
                 {step < 3 && (
@@ -433,16 +541,6 @@ export default function Auth() {
               {/* STEP 1 — Account */}
               {step === 1 && (
                 <div className="animate-fade-up">
-                  <div className="flex gap-1.5 bg-surface-2 p-1 rounded-xl mb-6 border border-border">
-                    {[['customer', "I'm a customer"], ['business_owner', 'I own a business']].map(([r, l]) => (
-                      <button key={r} type="button" onClick={() => setRole(r)}
-                        className={`flex-1 py-2.5 rounded-lg text-sm font-display font-bold transition-all
-                          ${role === r ? 'bg-blue text-white' : 'text-text-muted hover:text-text'}`}>
-                        {l}
-                      </button>
-                    ))}
-                  </div>
-
                   <form onSubmit={submitStep1} className="flex flex-col gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-text-muted mb-1.5">Full name</label>
@@ -597,6 +695,8 @@ export default function Auth() {
                   Sign in
                 </button>
               </p>
+            </div>
+            )}
             </div>
           )}
         </div>
