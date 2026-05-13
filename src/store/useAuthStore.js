@@ -24,6 +24,18 @@ const useAuthStore = create((set) => ({
     set({ loading: true })
     try {
       const { data } = await api.post('/auth/signup', payload)
+      set({ loading: false })
+      return data
+    } catch (err) {
+      set({ loading: false })
+      throw err
+    }
+  },
+
+  verifyOtp: async (userId, code) => {
+    set({ loading: true })
+    try {
+      const { data } = await api.post('/auth/verify-otp', { userId, code })
       localStorage.setItem('token', data.token)
       localStorage.setItem('refreshToken', data.refreshToken)
       set({ user: data.user, token: data.token, loading: false })
