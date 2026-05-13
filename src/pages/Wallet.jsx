@@ -145,24 +145,38 @@ export default function Wallet() {
               </div>
             ) : rewards.map(r => {
               const cfg = STATUS[r.status] || STATUS.used
+              const isAvail = r.status === 'available'
               return (
-                <div key={r.id} className="reward-card flex items-center gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-amber/15 border border-amber/20 flex items-center justify-center flex-shrink-0">
-                    <IcGift size={18} className="text-amber" />
+                <div key={r.id} className={`rounded-2xl overflow-hidden border transition-all duration-200 ${isAvail ? 'border-amber/25 hover:border-amber/50' : 'border-border'}`}
+                  style={{ boxShadow: isAvail ? '0 2px 12px rgba(255,138,61,0.1)' : '0 1px 3px rgba(17,24,39,0.06)', background: 'white' }}>
+                  <div className="p-4 flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isAvail ? 'bg-amber/12 border border-amber/25' : 'bg-surface-2 border border-border'}`}>
+                      <IcGift size={20} className={isAvail ? 'text-amber' : 'text-text-muted'} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display font-bold text-text leading-tight">{r.reward_title}</p>
+                      <p className="text-text-muted text-xs mt-0.5 truncate">{r.business_name}</p>
+                      <span className={`${cfg.class} mt-2.5 inline-flex text-[10px]`}>{cfg.label}</span>
+                    </div>
+                    <div className="flex-shrink-0 flex items-center">
+                      {isAvail ? (
+                        <button onClick={() => useReward(r.id)} className="btn-coral text-xs px-3.5 py-2 flex-shrink-0">
+                          Claim
+                        </button>
+                      ) : (
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.status === 'used' ? 'bg-green-stamp/12' : 'bg-surface-2'}`}>
+                          {r.status === 'used'
+                            ? <IcCheck size={14} className="text-green-stamp" />
+                            : <IcClock size={14} className="text-text-faint" />
+                          }
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display font-bold text-text text-sm truncate">{r.reward_title}</p>
-                    <p className="text-text-muted text-xs mt-0.5">{r.business_name}</p>
-                    <span className={`${cfg.class} mt-2 inline-flex text-[10px]`}>{cfg.label}</span>
-                  </div>
-                  {r.status === 'available' && (
-                    <button onClick={() => useReward(r.id)} className="btn-coral text-xs px-3 py-1.5 flex-shrink-0">
-                      Claim
-                    </button>
-                  )}
-                  {r.status === 'used' && (
-                    <div className="w-8 h-8 rounded-full bg-green-stamp/15 flex items-center justify-center flex-shrink-0">
-                      <IcCheck size={14} className="text-green-stamp" />
+                  {isAvail && (
+                    <div className="px-4 py-2.5 border-t border-amber/15 bg-amber/[0.03] flex items-center gap-1.5">
+                      <IcStar size={11} className="text-amber" />
+                      <p className="text-xs text-amber font-medium">Show this to staff to redeem your reward</p>
                     </div>
                   )}
                 </div>
@@ -176,20 +190,40 @@ export default function Wallet() {
                 <p className="font-display font-bold text-text mb-1">No challenges completed yet</p>
                 <p className="text-sm">Complete your first challenge to see history</p>
               </div>
-            ) : completions.map(c => (
-              <div key={c.id} className="card p-4 flex items-center gap-3 hover:border-border-2 transition-colors">
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_DOT[c.status] || 'bg-text-faint'}`} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-text truncate">{c.challenge_title}</p>
-                  <p className="text-xs text-text-muted">{c.business_name}</p>
+            ) : completions.map(c => {
+              const isConfirmed = c.status === 'confirmed' || c.status === 'claimed'
+              const isPending = c.status === 'pending'
+              return (
+                <div key={c.id} className="bg-white border border-border rounded-2xl px-4 py-3.5 flex items-center gap-3 hover:border-border-2 transition-colors"
+                  style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.05)' }}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    isConfirmed ? 'bg-green-stamp/10' : isPending ? 'bg-amber/10' : 'bg-coral/10'}`}>
+                    {isConfirmed
+                      ? <IcCheck size={15} className="text-green-stamp" />
+                      : isPending
+                        ? <IcClock size={15} className="text-amber" />
+                        : <IcAward size={15} className="text-coral" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-text truncate">{c.challenge_title}</p>
+                    <p className="text-xs text-text-muted truncate">{c.business_name}</p>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    {c.points_value > 0 && isConfirmed && (
+                      <p className="font-display font-black text-green-stamp text-sm tabular-nums">+{c.points_value} pts</p>
+                    )}
+                    {c.points_value > 0 && isPending && (
+                      <p className="font-display font-black text-amber text-sm tabular-nums opacity-60">+{c.points_value} pts</p>
+                    )}
+                    <p className={`text-[10px] font-display font-bold capitalize mt-0.5 ${
+                      isConfirmed ? 'text-green-stamp' : isPending ? 'text-amber' : 'text-coral'}`}>
+                      {c.status}
+                    </p>
+                  </div>
                 </div>
-                <span className={`text-xs font-display font-bold capitalize ${
-                  c.status === 'confirmed' || c.status === 'claimed' ? 'text-green-stamp' :
-                  c.status === 'pending' ? 'text-amber' : 'text-coral'}`}>
-                  {c.status}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

@@ -36,7 +36,7 @@ function ChallengeForm({ biz, onSave, initial, onCancel }) {
   }
 
   return (
-    <form onSubmit={submit} className="card p-6 flex flex-col gap-4 border-amber/20">
+    <form onSubmit={submit} className="card p-6 flex flex-col gap-4 border-blue/20">
       <h3 className="font-display font-bold text-text">{initial ? 'Edit challenge' : 'New challenge'}</h3>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
@@ -236,45 +236,61 @@ export default function Dashboard() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: 'Active challenges', value: challenges.filter(c => c.is_active).length, color: 'text-blue' },
-                { label: 'Pending',           value: pending.length,                             color: 'text-coral'   },
-                { label: 'Staff members',     value: staff.length,                               color: 'text-text'    },
-                { label: 'Plan',              value: biz.plan,                                   color: 'text-green-stamp' },
-              ].map(s => (
-                <div key={s.label} className="card p-5">
-                  <p className={`font-display font-black mb-1 ${s.color}`} style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)', letterSpacing: '-0.04em', lineHeight: 1 }}>
-                    {s.value}
-                  </p>
-                  <p className="text-text-muted text-xs">{s.label}</p>
-                </div>
-              ))}
+              <div className="stat-card stat-card-blue">
+                <p className="stat-num text-blue" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {challenges.filter(c => c.is_active).length}
+                </p>
+                <p className="text-text-muted text-xs mt-1">Active challenges</p>
+              </div>
+              <div className="stat-card stat-card-coral">
+                <p className="stat-num text-coral" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {pending.length}
+                </p>
+                <p className="text-text-muted text-xs mt-1">Pending</p>
+              </div>
+              <div className="stat-card stat-card-amber">
+                <p className="stat-num" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {staff.length}
+                </p>
+                <p className="text-text-muted text-xs mt-1">Staff members</p>
+              </div>
+              <div className="stat-card stat-card-green">
+                <p className="stat-num text-green-stamp capitalize" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                  {biz.plan}
+                </p>
+                <p className="text-text-muted text-xs mt-1">Current plan</p>
+              </div>
             </div>
 
             {/* Pending */}
             {pending.length > 0 && (
               <div>
                 <div className="flex items-center gap-2.5 mb-4">
-                  <IcBell size={14} className="text-coral" />
+                  <div className="w-7 h-7 rounded-lg bg-coral/10 flex items-center justify-center">
+                    <IcBell size={13} className="text-coral" />
+                  </div>
                   <h2 className="font-display font-bold text-text">Pending confirmations</h2>
                   <span className="badge-coral text-xs">{pending.length}</span>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {pending.map(p => (
-                    <div key={p.id} className="card p-4 flex items-center gap-3 border-coral/15">
+                <div className="rounded-2xl overflow-hidden border border-coral/15" style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.06)' }}>
+                  {pending.map((p, i) => (
+                    <div key={p.id} className={`flex items-center gap-3 px-4 py-3.5 bg-white ${i < pending.length - 1 ? 'border-b border-border' : ''}`}>
                       <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0">
                         {p.full_name?.[0]}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-text truncate">{p.full_name}</p>
+                        <p className="text-sm font-semibold text-text truncate">{p.full_name}</p>
                         <p className="text-xs text-text-muted truncate">{p.challenge_title}</p>
                       </div>
-                      <span className="badge-amber text-xs truncate hidden sm:inline-flex">{p.reward_title}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="badge-amber text-xs hidden sm:inline-flex">{p.reward_title}</span>
+                        <span className="w-2 h-2 rounded-full bg-coral animate-pulse" />
+                      </div>
                     </div>
                   ))}
                 </div>
                 <p className="text-text-muted text-xs mt-3">
-                  Staff confirm on the <Link to="/staff" className="text-blue hover:underline">staff screen</Link> using their PIN.
+                  Staff confirm on the <Link to="/staff" className="text-blue hover:underline font-medium">staff screen</Link> using their PIN.
                 </p>
               </div>
             )}

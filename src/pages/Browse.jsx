@@ -268,40 +268,65 @@ export default function Browse() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {businesses.map(b => {
-              const accent = CAT_ACCENTS[b.category] || '#F5A623'
+              const accent = CAT_ACCENTS[b.category] || '#2767FF'
               return (
-                <Link key={b.id} to={`/b/${b.slug}`} className="card-hover group block">
-                  {/* Color strip */}
-                  <div className="h-1.5 rounded-t-2xl" style={{ backgroundColor: accent, opacity: 0.7 }} />
+                <Link key={b.id} to={`/b/${b.slug}`} className="group block rounded-2xl bg-white border border-border overflow-hidden transition-all duration-300"
+                  style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.06)' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 16px 48px ${accent}1E, 0 4px 12px rgba(17,24,39,0.08)`; e.currentTarget.style.borderColor = `${accent}30` }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 3px rgba(17,24,39,0.06)'; e.currentTarget.style.borderColor = '' }}>
 
-                  <div className="p-5">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-lg flex-shrink-0 border border-border"
-                        style={{ background: `${accent}18`, color: accent }}>
-                        {b.logo_url
-                          ? <img src={b.logo_url} className="w-full h-full object-cover rounded-xl" alt="" />
-                          : (b.name?.[0] || '?')}
+                  {/* Header zone */}
+                  <div className="h-28 relative overflow-hidden flex-shrink-0"
+                    style={{ background: `linear-gradient(135deg, ${accent}18 0%, ${accent}08 100%)` }}>
+                    {b.cover_url
+                      ? <img src={b.cover_url} className="w-full h-full object-cover" alt="" />
+                      : (
+                        <>
+                          <svg className="absolute inset-0 w-full h-full opacity-[0.25]" xmlns="http://www.w3.org/2000/svg">
+                            <defs><pattern id={`p-${b.id}`} width="20" height="20" patternUnits="userSpaceOnUse">
+                              <circle cx="1" cy="1" r="1" fill={accent} />
+                            </pattern></defs>
+                            <rect width="100%" height="100%" fill={`url(#p-${b.id})`} />
+                          </svg>
+                          <div className="absolute right-4 bottom-2 font-display font-black opacity-[0.07] select-none"
+                            style={{ fontSize: '5rem', lineHeight: 1, color: accent, letterSpacing: '-0.05em' }}>
+                            {b.name?.[0] || '?'}
+                          </div>
+                        </>
+                      )
+                    }
+                    <div className="absolute top-3 right-3">
+                      <span className="text-[11px] font-display font-bold px-2.5 py-1 rounded-full"
+                        style={{ background: `${accent}22`, color: accent, border: `1px solid ${accent}35` }}>
+                        {b.challenge_count} {b.challenge_count !== '1' ? 'challenges' : 'challenge'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="px-4 pb-4">
+                    <div className="flex items-end justify-between -mt-5 mb-3">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-xl overflow-hidden flex-shrink-0"
+                        style={{ background: `linear-gradient(135deg, ${accent}28, ${accent}14)`, color: accent, border: '2.5px solid white', boxShadow: `0 2px 10px ${accent}28` }}>
+                        {b.logo_url ? <img src={b.logo_url} className="w-full h-full object-cover" alt="" /> : (b.name?.[0] || '?')}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="font-display font-bold text-text text-sm truncate">{b.name}</p>
-                        <p className="text-text-muted text-xs mt-0.5 capitalize">{b.category}</p>
-                        <p className="text-text-faint text-[10px] font-mono mt-0.5">{b.slug}</p>
-                      </div>
+                      <span className="text-xs text-text-muted opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-1 transition-all duration-200 flex items-center gap-1 font-semibold pb-1">
+                        Explore <IcArrowRight size={10} />
+                      </span>
+                    </div>
+
+                    <p className="font-display font-black text-text leading-tight mb-1 truncate" style={{ fontSize: '1.05rem', letterSpacing: '-0.025em' }}>
+                      {b.name}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: accent }} />
+                      <p className="text-text-muted text-xs capitalize">{b.category || 'Local Business'}</p>
+                      {b.city_name && <span className="text-text-faint text-xs">· {b.city_name}</span>}
                     </div>
 
                     {b.description && (
-                      <p className="text-text-muted text-xs leading-relaxed mb-4 line-clamp-2">{b.description}</p>
+                      <p className="text-text-muted text-xs leading-relaxed mt-2.5 line-clamp-2">{b.description}</p>
                     )}
-
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <span className="badge text-xs px-2.5 py-1 font-display font-bold"
-                        style={{ backgroundColor: `${accent}15`, color: accent, borderColor: `${accent}30`, border: '1px solid' }}>
-                        {b.challenge_count} challenge{b.challenge_count !== '1' ? 's' : ''}
-                      </span>
-                      <span className="text-xs text-text-muted font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                        View <IcArrowRight size={11} />
-                      </span>
-                    </div>
                   </div>
                 </Link>
               )
