@@ -76,7 +76,18 @@ export default function BusinessSetup() {
                 <IcMapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
                 <select className="input pl-9" value={form.cityId} onChange={e => set('cityId', e.target.value)}>
                   <option value="">Select your city...</option>
-                  {cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {Object.entries(
+                    cities.reduce((acc, c) => {
+                      const country = c.country || 'Other'
+                      acc[country] = acc[country] || []
+                      acc[country].push(c)
+                      return acc
+                    }, {})
+                  ).map(([country, cs]) => (
+                    <optgroup key={country} label={country}>
+                      {cs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
             </div>
@@ -125,7 +136,7 @@ export default function BusinessSetup() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">Phone</label>
-                <input className="input" type="tel" placeholder="+90 5XX..." value={form.phone} onChange={e => set('phone', e.target.value)} />
+                <input className="input" type="tel" placeholder="+1 555 000..." value={form.phone} onChange={e => set('phone', e.target.value)} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-text-muted mb-1.5">Website</label>

@@ -139,19 +139,35 @@ export default function Browse() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [cat, setCat] = useState('')
-  const [city, setCity] = useState('istanbul')
+  const [city, setCity] = useState('')
+  const [cities, setCities] = useState([])
+  const [showCityPicker, setShowCityPicker] = useState(false)
+  const [citySearch, setCitySearch] = useState('')
   const [showScanner, setShowScanner] = useState(false)
   const [showCode, setShowCode] = useState(false)
+
+  useEffect(() => {
+    api.get('/cities').then(r => setCities(r.data)).catch(() => {})
+  }, [])
 
   useEffect(() => {
     setLoading(true)
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     if (cat) params.set('category', cat)
-    api.get(`/businesses/city/${city}?${params}`).then(r => {
+    const url = city
+      ? `/businesses/city/${city}?${params}`
+      : `/businesses?${params}`
+    api.get(url).then(r => {
       setBusinesses(r.data); setLoading(false)
     }).catch(() => setLoading(false))
   }, [city, cat, search])
+
+  const selectedCityName = cities.find(c => c.slug === city)?.name || null
+  const filteredCities = cities.filter(c =>
+    !citySearch || c.name.toLowerCase().includes(citySearch.toLowerCase()) || c.country?.toLowerCase().includes(citySearch.toLowerCase())
+  )
+  const countriesInResults = [...new Set(filteredCities.map(c => c.country).filter(Boolean))]
 
   const handleQrResult = (text) => {
     setShowScanner(false)
@@ -201,19 +217,82 @@ export default function Browse() {
         </div>
       </nav>
 
+      {/* CITY PICKER MODAL */}
+      {showCityPicker && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-bg/90 backdrop-blur-sm px-4 pb-4 sm:pb-0"
+          onClick={e => { if (e.target === e.currentTarget) { setShowCityPicker(false); setCitySearch('') } }}>
+          <div className="card w-full max-w-sm flex flex-col" style={{ maxHeight: '80vh' }}>
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-display font-bold text-text">Choose a city</h2>
+                <button onClick={() => { setShowCityPicker(false); setCitySearch('') }} className="p-1.5 text-text-muted hover:text-text rounded-lg hover:bg-surface-2 transition-colors">
+                  <IcX size={16} />
+                </button>
+              </div>
+              <div className="relative">
+                <IcSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input className="input pl-9 h-9 text-sm" placeholder="Search cities or countries..."
+                  value={citySearch} onChange={e => setCitySearch(e.target.value)} autoFocus />
+              </div>
+            </div>
+            <div className="overflow-y-auto flex-1">
+              <button onClick={() => { setCity(''); setShowCityPicker(false); setCitySearch('') }}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-2 transition-colors border-b border-border ${!city ? 'bg-blue/5' : ''}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${!city ? 'bg-blue/10' : 'bg-surface-2'}`}>
+                  <IcZap size={14} className={!city ? 'text-blue' : 'text-text-muted'} />
+                </div>
+                <div>
+                  <p className={`text-sm font-display font-bold ${!city ? 'text-blue' : 'text-text'}`}>Everywhere</p>
+                  <p className="text-xs text-text-muted">All cities worldwide</p>
+                </div>
+                {!city && <div className="ml-auto w-2 h-2 rounded-full bg-blue" />}
+              </button>
+              {countriesInResults.length > 0 ? countriesInResults.map(country => (
+                <div key={country}>
+                  <p className="px-4 pt-3 pb-1 text-[10px] font-display font-black uppercase tracking-[0.1em] text-text-faint">{country}</p>
+                  {filteredCities.filter(c => c.country === country).map(c => (
+                    <button key={c.id} onClick={() => { setCity(c.slug); setShowCityPicker(false); setCitySearch('') }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-2 transition-colors ${city === c.slug ? 'bg-blue/5' : ''}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${city === c.slug ? 'bg-blue/10' : 'bg-surface-2'}`}>
+                        <IcMapPin size={13} className={city === c.slug ? 'text-blue' : 'text-text-muted'} />
+                      </div>
+                      <p className={`text-sm font-medium ${city === c.slug ? 'text-blue font-bold' : 'text-text'}`}>{c.name}</p>
+                      {city === c.slug && <div className="ml-auto w-2 h-2 rounded-full bg-blue" />}
+                    </button>
+                  ))}
+                </div>
+              )) : (
+                filteredCities.map(c => (
+                  <button key={c.id} onClick={() => { setCity(c.slug); setShowCityPicker(false); setCitySearch('') }}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-2 transition-colors ${city === c.slug ? 'bg-blue/5' : ''}`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${city === c.slug ? 'bg-blue/10' : 'bg-surface-2'}`}>
+                      <IcMapPin size={13} className={city === c.slug ? 'text-blue' : 'text-text-muted'} />
+                    </div>
+                    <p className={`text-sm font-medium ${city === c.slug ? 'text-blue font-bold' : 'text-text'}`}>{c.name}</p>
+                    {city === c.slug && <div className="ml-auto w-2 h-2 rounded-full bg-blue" />}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 py-8">
 
         {/* HEADER */}
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <button onClick={() => setShowCityPicker(true)}
+              className="flex items-center gap-1.5 mb-2 group hover:opacity-80 transition-opacity">
               <IcMapPin size={14} className="text-blue" />
-              <select value={city} onChange={e => setCity(e.target.value)}
-                className="bg-transparent text-blue font-display font-black text-sm focus:outline-none cursor-pointer" style={{ letterSpacing: '-0.01em' }}>
-                <option value="istanbul">Istanbul</option>
-                <option value="ankara">Ankara</option>
-              </select>
-            </div>
+              <span className="font-display font-black text-blue text-sm" style={{ letterSpacing: '-0.01em' }}>
+                {selectedCityName || 'Everywhere'}
+              </span>
+              <svg width="10" height="10" viewBox="0 0 10 10" className="text-blue opacity-60">
+                <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
+            </button>
             <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)', letterSpacing: '-0.035em', lineHeight: 1 }}>
               Discover & earn
             </h1>
