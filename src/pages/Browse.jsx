@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { Html5Qrcode } from 'html5-qrcode'
 import {
@@ -697,6 +697,8 @@ export default function Browse() {
                 {mappable.map(b => {
                   const accent = CAT_ACCENTS[b.category] || '#2767FF'
                   const isSelected = selectedBizId === b.id
+                  const challengeCount = parseInt(b.challenge_count) || 0
+                  const totalPoints = parseInt(b.total_points) || 0
                   return (
                     <Marker
                       key={b.id}
@@ -704,6 +706,52 @@ export default function Browse() {
                       icon={createPinIcon(b, isSelected)}
                       eventHandlers={{ click: () => setSelectedBizId(b.id) }}
                     >
+                      <Tooltip direction="top" offset={[0, -38]} opacity={1} className="achievo-tooltip">
+                        <div style={{ fontFamily: 'system-ui,sans-serif', minWidth: 210, maxWidth: 240 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                            <div style={{
+                              width: 42, height: 42, borderRadius: 11, overflow: 'hidden', flexShrink: 0,
+                              background: `linear-gradient(135deg,${accent}30,${accent}15)`,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: accent, fontWeight: 900, fontSize: 18,
+                              border: `1.5px solid ${accent}25`,
+                            }}>
+                              {b.logo_url ? <img src={b.logo_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" /> : b.name[0]}
+                            </div>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <p style={{ margin: 0, fontWeight: 900, fontSize: 14, color: '#111827', letterSpacing: '-0.015em', lineHeight: 1.2 }}>{b.name}</p>
+                              <p style={{ margin: '3px 0 0', fontSize: 11, color: '#6B7A99', textTransform: 'capitalize' }}>{b.category} · {b.city_name}</p>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            <div style={{
+                              flex: 1, background: `${accent}12`, border: `1px solid ${accent}25`,
+                              borderRadius: 8, padding: '6px 8px', textAlign: 'center',
+                            }}>
+                              <p style={{ margin: 0, fontWeight: 900, fontSize: 15, color: accent, lineHeight: 1 }}>{challengeCount}</p>
+                              <p style={{ margin: '2px 0 0', fontSize: 10, color: '#6B7A99', fontWeight: 600 }}>challenge{challengeCount !== 1 ? 's' : ''}</p>
+                            </div>
+                            <div style={{
+                              flex: 1, background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.25)',
+                              borderRadius: 8, padding: '6px 8px', textAlign: 'center',
+                            }}>
+                              <p style={{ margin: 0, fontWeight: 900, fontSize: 15, color: '#F5A623', lineHeight: 1 }}>{totalPoints}</p>
+                              <p style={{ margin: '2px 0 0', fontSize: 10, color: '#6B7A99', fontWeight: 600 }}>pts to earn</p>
+                            </div>
+                            {b.distance != null && (
+                              <div style={{
+                                flex: 1, background: 'rgba(39,103,255,0.08)', border: '1px solid rgba(39,103,255,0.2)',
+                                borderRadius: 8, padding: '6px 8px', textAlign: 'center',
+                              }}>
+                                <p style={{ margin: 0, fontWeight: 900, fontSize: 13, color: '#2767FF', lineHeight: 1 }}>
+                                  {b.distance < 1 ? `${Math.round(b.distance * 1000)}m` : `${b.distance.toFixed(1)}km`}
+                                </p>
+                                <p style={{ margin: '2px 0 0', fontSize: 10, color: '#6B7A99', fontWeight: 600 }}>away</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Tooltip>
                       <Popup maxWidth={240} className="achievo-popup">
                         <div style={{ fontFamily: 'system-ui,sans-serif', minWidth: 200 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
@@ -720,9 +768,9 @@ export default function Browse() {
                               <p style={{ margin: '2px 0 0', fontSize: 11, color: '#6B7A99', textTransform: 'capitalize' }}>{b.category} · {b.city_name}</p>
                             </div>
                           </div>
-                          {parseInt(b.challenge_count) > 0 && (
+                          {challengeCount > 0 && (
                             <p style={{ margin: '0 0 8px', fontSize: 12, color: accent, fontWeight: 700 }}>
-                              🏆 {b.challenge_count} active {parseInt(b.challenge_count) === 1 ? 'challenge' : 'challenges'}
+                              🏆 {challengeCount} active {challengeCount === 1 ? 'challenge' : 'challenges'} · {totalPoints} pts to earn
                             </p>
                           )}
                           {b.distance != null && (
@@ -778,6 +826,8 @@ export default function Browse() {
         .leaflet-popup-content{margin:0!important}
         .leaflet-popup-tip{display:none!important}
         .leaflet-control-zoom{display:none}
+        .achievo-tooltip .leaflet-tooltip{background:white!important;border:1px solid rgba(0,0,0,0.08)!important;border-radius:16px!important;padding:12px!important;box-shadow:0 8px 32px rgba(0,0,0,0.16)!important;font-family:system-ui,sans-serif!important}
+        .achievo-tooltip .leaflet-tooltip::before{display:none!important}
       `}</style>
     </div>
   )
