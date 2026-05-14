@@ -22,7 +22,7 @@ const STATUS_DOT = {
 }
 
 export default function Wallet() {
-  const { user, logout } = useAuthStore()
+  const { user, logout, fetchMe } = useAuthStore()
   const { toast } = useToastStore()
   const [rewards, setRewards] = useState([])
   const [completions, setCompletions] = useState([])
@@ -30,6 +30,7 @@ export default function Wallet() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    fetchMe()
     Promise.all([api.get('/rewards/mine'), api.get('/completions/mine')]).then(([r, c]) => {
       setRewards(r.data); setCompletions(c.data); setLoading(false)
     })
@@ -79,8 +80,11 @@ export default function Wallet() {
             style={{ background: 'radial-gradient(circle, #2767FF 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
 
           <div className="relative flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 flex-shrink-0">
-              {user?.full_name?.[0]?.toUpperCase()}
+            <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 flex-shrink-0 overflow-hidden">
+              {user?.avatar_url
+                ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" />
+                : user?.full_name?.[0]?.toUpperCase()
+              }
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-display font-black text-text truncate" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em' }}>

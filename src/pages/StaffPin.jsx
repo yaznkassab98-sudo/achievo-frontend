@@ -87,10 +87,14 @@ export default function StaffPin() {
 
   const reject = async () => {
     if (!selected) return
-    await api.put(`/completions/${selected.id}/reject`)
-    toast('Completion rejected', 'info')
-    setPending(p => p.filter(x => x.id !== selected.id))
-    setSelected(null); setPin('')
+    try {
+      await api.put(`/completions/${selected.id}/reject`, { pin: pin || undefined })
+      toast('Completion rejected', 'info')
+      setPending(p => p.filter(x => x.id !== selected.id))
+      setSelected(null); setPin('')
+    } catch {
+      toast('Failed to reject', 'error')
+    }
   }
 
   if (!bizId) return (

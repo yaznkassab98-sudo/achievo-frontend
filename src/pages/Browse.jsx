@@ -147,7 +147,13 @@ export default function Browse() {
   const [showCode, setShowCode] = useState(false)
 
   useEffect(() => {
-    api.get('/cities').then(r => setCities(r.data)).catch(() => {})
+    api.get('/cities').then(r => {
+      setCities(r.data)
+      if (user?.city_id && !city) {
+        const match = r.data.find(c => c.id === user.city_id)
+        if (match) setCity(match.slug)
+      }
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
