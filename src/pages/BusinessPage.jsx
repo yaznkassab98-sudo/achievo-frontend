@@ -114,10 +114,12 @@ export default function BusinessPage() {
   const [biz, setBiz] = useState(null)
   const [loading, setLoading] = useState(true)
   const [progressMap, setProgressMap] = useState({})
+  const [leaderboard, setLeaderboard] = useState([])
 
   useEffect(() => {
     api.get(`/businesses/slug/${slug}`).then(r => {
       setBiz(r.data); setLoading(false)
+      api.get(`/businesses/${r.data.id}/leaderboard`).then(lb => setLeaderboard(lb.data)).catch(() => {})
     }).catch(() => setLoading(false))
   }, [slug])
 
@@ -246,6 +248,43 @@ export default function BusinessPage() {
             <h2 className="font-display font-bold text-lg text-text">Active challenges</h2>
             <span className="badge-amber text-xs">{total}</span>
           </div>
+
+          {leaderboard.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-4">
+                <IcStar size={16} className="text-amber" />
+                <h2 className="font-display font-bold text-lg text-text">Top customers</h2>
+              </div>
+              <div className="card overflow-hidden">
+                {leaderboard.map((entry, i) => {
+                  const medals = ['🥇','🥈','🥉']
+                  const isTop = i < 3
+                  return (
+                    <div key={entry.id} className={`flex items-center gap-3 px-4 py-3 border-b border-border last:border-0 ${isTop ? 'bg-amber/[0.02]' : ''}`}>
+                      <span className="w-7 text-center text-sm flex-shrink-0">
+                        {medals[i] || <span className="text-text-faint font-mono text-xs">{i + 1}</span>}
+                      </span>
+                      <div className="w-9 h-9 rounded-full bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0 overflow-hidden border border-blue/15">
+                        {entry.avatar_url
+                          ? <img src={entry.avatar_url} className="w-full h-full object-cover" alt="" />
+                          : entry.full_name?.[0]?.toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-display font-bold text-text truncate">{entry.full_name}</p>
+                        <p className="text-xs text-text-muted">{entry.completions} challenge{entry.completions !== '1' ? 's' : ''} completed</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-display font-black text-amber tabular-nums" style={{ fontSize: '1rem', letterSpacing: '-0.03em' }}>
+                          {entry.total_points}
+                        </p>
+                        <p className="text-[10px] text-text-faint">pts</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {!total ? (
             <div className="card p-10 text-center text-text-muted">

@@ -14,6 +14,7 @@ import EditProfile from './pages/EditProfile'
 import NotFound from './pages/NotFound'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
+import Admin from './pages/Admin'
 
 function ProtectedRoute({ children, role }) {
   const { user, token } = useAuthStore()
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/staff" element={<StaffPin />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/admin" element={<ProtectedRoute role="admin"><Admin /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

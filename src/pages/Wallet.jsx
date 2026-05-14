@@ -26,13 +26,18 @@ export default function Wallet() {
   const { toast } = useToastStore()
   const [rewards, setRewards] = useState([])
   const [completions, setCompletions] = useState([])
+  const [achievements, setAchievements] = useState([])
   const [tab, setTab] = useState('rewards')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchMe()
-    Promise.all([api.get('/rewards/mine'), api.get('/completions/mine')]).then(([r, c]) => {
-      setRewards(r.data); setCompletions(c.data); setLoading(false)
+    Promise.all([
+      api.get('/rewards/mine'),
+      api.get('/completions/mine'),
+      api.get('/completions/achievements'),
+    ]).then(([r, c, a]) => {
+      setRewards(r.data); setCompletions(c.data); setAchievements(a.data); setLoading(false)
     })
   }, [])
 
@@ -118,6 +123,26 @@ export default function Wallet() {
             ))}
           </div>
         </div>
+
+        {/* ACHIEVEMENTS */}
+        {achievements.length > 0 && (
+          <div className="mb-6">
+            <p className="text-xs font-display font-black uppercase tracking-widest text-text-faint mb-3">Achievements</p>
+            <div className="flex flex-wrap gap-2">
+              {achievements.map(a => (
+                <div key={a.type} title={a.desc}
+                  className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-white transition-all hover:shadow-md cursor-default"
+                  style={{ boxShadow: `0 1px 4px ${a.color}18` }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }}>{a.emoji}</span>
+                  <div>
+                    <p className="text-xs font-display font-black text-text leading-none" style={{ color: a.color }}>{a.label}</p>
+                    <p className="text-[10px] text-text-muted mt-0.5 leading-none">{a.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* TABS */}
         <div className="flex gap-1 bg-surface border border-border p-1 rounded-xl mb-6">
