@@ -12,6 +12,8 @@ import BusinessSetup from './pages/BusinessSetup'
 import StaffPin from './pages/StaffPin'
 import EditProfile from './pages/EditProfile'
 import NotFound from './pages/NotFound'
+import Terms from './pages/Terms'
+import Privacy from './pages/Privacy'
 
 function ProtectedRoute({ children, role }) {
   const { user, token } = useAuthStore()
@@ -40,6 +42,8 @@ export default function App() {
         <Route path="/dashboard" element={<ProtectedRoute role="business_owner"><Dashboard /></ProtectedRoute>} />
         <Route path="/setup" element={<ProtectedRoute role="business_owner"><BusinessSetup /></ProtectedRoute>} />
         <Route path="/staff" element={<StaffPin />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

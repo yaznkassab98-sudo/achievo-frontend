@@ -503,14 +503,14 @@ export default function Landing() {
               <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.35)' }}>Loyalty that travels with you. Built for cafés, restaurants, salons, and hotels worldwide.</p>
             </div>
             {[
-              { title: 'Product', links: ['Browse businesses', 'For business owners', 'Pricing', 'How it works'] },
-              { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
-              { title: 'Legal', links: ['Privacy policy', 'Terms of service', 'Cookie policy'] },
+              { title: 'Product', links: [{ label: 'Browse businesses', href: '/browse' }, { label: 'For business owners', href: '/auth?mode=signup&role=business_owner' }, { label: 'How it works', href: '#how' }] },
+              { title: 'Company', links: [{ label: 'Contact', href: 'mailto:hello@achievo.app' }] },
+              { title: 'Legal', links: [{ label: 'Privacy policy', href: '/privacy' }, { label: 'Terms of service', href: '/terms' }] },
             ].map(col => (
               <div key={col.title}>
                 <p className="font-display font-bold text-sm mb-4" style={{ color: 'rgba(255,255,255,0.6)' }}>{col.title}</p>
                 {col.links.map(l => (
-                  <a key={l} href="#" className="block text-sm mb-2.5 transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.3)' }}>{l}</a>
+                  <a key={l.label} href={l.href} className="block text-sm mb-2.5 transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.3)' }}>{l.label}</a>
                 ))}
               </div>
             ))}

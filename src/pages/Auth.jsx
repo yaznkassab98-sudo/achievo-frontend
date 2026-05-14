@@ -145,6 +145,11 @@ export default function Auth() {
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const otpRefs = useRef([])
   const avatarInputRef = useRef(null)
+  const [forgotStep, setForgotStep] = useState(1)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotUserId, setForgotUserId] = useState(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [showNewPw, setShowNewPw] = useState(false)
 
   const [form, setForm] = useState({
     email: '', password: '', fullName: '',
@@ -284,6 +289,71 @@ export default function Auth() {
     setStep(newMode === 'signup' ? 0 : 1)
     setError('')
     setOtp(['', '', '', '', '', ''])
+    setForgotStep(1)
+    setForgotEmail('')
+    setForgotUserId(null)
+    setNewPassword('')
+  }
+
+  const submitForgotEmail = async (e) => {
+    e.preventDefault()
+    setError(''); setSubmitting(true)
+    try {
+      const res = await api.post('/auth/forgot-password', { email: forgotEmail })
+      if (res.data.userId) {
+        setForgotUserId(res.data.userId)
+        setForgotStep(2)
+        setResendCooldown(60)
+      } else {
+        setForgotStep(2)
+        setForgotUserId(null)
+      }
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setForgotStep(2)
+        setResendCooldown(60)
+      } else {
+        setError(err.response?.data?.error || 'Something went wrong')
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const submitForgotOtp = () => {
+    const code = otp.join('')
+    if (code.length !== 6 || !forgotUserId) return
+    setError('')
+    setForgotStep(3)
+  }
+
+  const submitNewPassword = async (e) => {
+    e.preventDefault()
+    if (newPassword.length < 8) { setError('Password must be at least 8 characters'); return }
+    const code = otp.join('')
+    setError(''); setSubmitting(true)
+    try {
+      await api.post('/auth/reset-password', { userId: forgotUserId, code, newPassword })
+      toast('Password reset! Please sign in.', 'success')
+      switchMode('login')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Something went wrong')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleForgotResend = async () => {
+    if (resendCooldown > 0 || !forgotUserId) return
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail })
+      toast('New code sent!', 'success')
+      setResendCooldown(60)
+      setOtp(['', '', '', '', '', ''])
+      setTimeout(() => otpRefs.current[0]?.focus(), 50)
+    } catch {
+      toast('Failed to resend', 'error')
+    }
   }
 
   const otpFilled = otp.every(d => d !== '')
@@ -394,7 +464,13 @@ export default function Auth() {
                     value={form.email} onChange={e => set('email', e.target.value)} required autoFocus />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Password</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-text-muted">Password</label>
+                    <button type="button" onClick={() => switchMode('forgot')}
+                      className="text-xs text-blue hover:underline font-medium">
+                      Forgot password?
+                    </button>
+                  </div>
                   <div className="relative">
                     <input className="input pr-11" type={showPw ? 'text' : 'password'} placeholder="Your password"
                       value={form.password} onChange={e => set('password', e.target.value)} required />
@@ -417,6 +493,108 @@ export default function Auth() {
                   Sign up free
                 </button>
               </p>
+            </div>
+          )}
+
+          {/* ── FORGOT PASSWORD ── */}
+          {mode === 'forgot' && (
+            <div className="animate-fade-up">
+              <button onClick={() => switchMode('login')}
+                className="inline-flex items-center gap-1.5 text-text-muted text-sm hover:text-text mb-6 transition-colors group">
+                <IcArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" /> Back to sign in
+              </button>
+
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mb-4">
+                  <IcShield size={28} className="text-blue" />
+                </div>
+                <h1 className="font-display font-black text-text mb-1" style={{ fontSize: 'clamp(1.6rem,4vw,2rem)', letterSpacing: '-0.035em' }}>
+                  {forgotStep === 1 ? 'Reset password' : forgotStep === 2 ? 'Check your email' : 'New password'}
+                </h1>
+                <p className="text-text-muted text-sm text-center max-w-xs leading-relaxed">
+                  {forgotStep === 1 && "Enter your email and we'll send you a reset code."}
+                  {forgotStep === 2 && <>Code sent to <strong className="text-text">{forgotEmail}</strong>. Enter it below.</>}
+                  {forgotStep === 3 && 'Choose a new password for your account.'}
+                </p>
+              </div>
+
+              {error && (
+                <div className="bg-coral/10 border border-coral/25 text-coral text-sm rounded-xl px-4 py-3 mb-5">{error}</div>
+              )}
+
+              {forgotStep === 1 && (
+                <form onSubmit={submitForgotEmail} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted mb-1.5">Email address</label>
+                    <input className="input" type="email" placeholder="you@example.com" autoFocus
+                      value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} required />
+                  </div>
+                  <button type="submit" disabled={submitting}
+                    className="btn-primary justify-center py-3.5 disabled:opacity-40">
+                    {submitting ? 'Sending...' : 'Send reset code'}
+                    {!submitting && <IcArrowRight size={16} />}
+                  </button>
+                </form>
+              )}
+
+              {forgotStep === 2 && (
+                <div>
+                  <div className="flex gap-2 justify-center mb-6" onPaste={handleOtpPaste}>
+                    {otp.map((digit, i) => (
+                      <input
+                        key={i}
+                        ref={el => otpRefs.current[i] = el}
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={1}
+                        value={digit}
+                        onChange={e => handleOtpInput(i, e.target.value)}
+                        onKeyDown={e => handleOtpKeyDown(i, e)}
+                        className="w-12 h-14 text-center text-xl font-display font-black text-text bg-white border-2 rounded-xl transition-all focus:outline-none focus:border-blue"
+                        style={{
+                          borderColor: digit ? '#2767FF' : undefined,
+                          boxShadow: digit ? '0 0 0 3px rgba(39,103,255,0.12)' : undefined,
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <button onClick={submitForgotOtp} disabled={!otpFilled || !forgotUserId}
+                    className="btn-primary w-full justify-center py-3.5 mb-4 disabled:opacity-40">
+                    {submitting ? 'Verifying...' : 'Verify code'}
+                    {!submitting && <IcArrowRight size={16} />}
+                  </button>
+                  <p className="text-center text-sm text-text-muted">
+                    Didn't receive it?{' '}
+                    {resendCooldown > 0
+                      ? <span className="text-text-faint">Resend in {resendCooldown}s</span>
+                      : <button onClick={handleForgotResend} className="text-blue hover:underline font-semibold">Resend code</button>
+                    }
+                  </p>
+                </div>
+              )}
+
+              {forgotStep === 3 && (
+                <form onSubmit={submitNewPassword} className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted mb-1.5">New password</label>
+                    <div className="relative">
+                      <input className="input pr-11" type={showNewPw ? 'text' : 'password'}
+                        placeholder="Min. 8 characters" autoFocus
+                        value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={8} />
+                      <button type="button" onClick={() => setShowNewPw(s => !s)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition-colors">
+                        {showNewPw ? <IcEyeOff size={16} /> : <IcEye size={16} />}
+                      </button>
+                    </div>
+                    <PwStrengthBar password={newPassword} />
+                  </div>
+                  <button type="submit" disabled={submitting || newPassword.length < 8}
+                    className="btn-primary justify-center py-3.5 disabled:opacity-40">
+                    {submitting ? 'Saving...' : 'Set new password'}
+                    {!submitting && <IcCheck size={16} />}
+                  </button>
+                </form>
+              )}
             </div>
           )}
 
