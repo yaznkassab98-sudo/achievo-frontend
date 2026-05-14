@@ -11,11 +11,63 @@ import useToastStore from '../store/useToastStore'
 
 const TABS = [
   { id: 'overview',   label: 'Overview',   icon: IcBarChart },
+  { id: 'analytics',  label: 'Analytics',  icon: IcStar },
   { id: 'challenges', label: 'Challenges', icon: IcAward },
   { id: 'staff',      label: 'Staff',      icon: IcUsers },
   { id: 'qr',         label: 'QR Code',    icon: IcQr },
   { id: 'settings',   label: 'Settings',   icon: IcPencil },
 ]
+
+const DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+
+function WeeklyChart({ weekly }) {
+  const weeks = Array.from({ length: 8 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (7 * (7 - i)))
+    const key = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()).toISOString().split('T')[0]
+    const found = weekly.find(w => w.week?.split('T')[0] === key || w.week?.startsWith(key))
+    return { label: i === 7 ? 'This wk' : i === 6 ? 'Last wk' : `${8-i}w ago`, count: parseInt(found?.count || 0) }
+  })
+  const max = Math.max(...weeks.map(w => w.count), 1)
+  return (
+    <div className="flex items-end gap-1.5 h-20 w-full">
+      {weeks.map((w, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group relative">
+          <div className="w-full rounded-t-md transition-all duration-300"
+            style={{ height: `${Math.max((w.count / max) * 100, w.count > 0 ? 8 : 3)}%`, background: i === 7 ? '#2767FF' : i === 6 ? '#7BA7FF' : 'rgba(39,103,255,0.18)' }} />
+          {w.count > 0 && (
+            <div className="absolute bottom-full mb-1 bg-text text-bg rounded-lg px-2 py-1 text-xs font-mono opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">{w.count}</div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DayChart({ dayOfWeek }) {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const found = dayOfWeek.find(d => parseInt(d.dow) === i)
+    return { label: DAY_LABELS[i], count: parseInt(found?.count || 0) }
+  })
+  const max = Math.max(...days.map(d => d.count), 1)
+  return (
+    <div className="flex items-end gap-2 h-14 w-full">
+      {days.map((d, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
+          <div className="w-full rounded-t-sm"
+            style={{ height: `${Math.max((d.count / max) * 100, d.count > 0 ? 10 : 3)}%`, background: d.count === max ? '#F5A623' : 'rgba(245,166,35,0.25)' }} />
+          <span className="text-[9px] text-text-faint font-medium">{d.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CustomerStatus({ lastSeen }) {
+  const days = Math.floor((Date.now() - new Date(lastSeen)) / 86400000)
+  if (days <= 14) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-stamp/10 text-green-stamp border border-green-stamp/20">Active</span>
+  if (days <= 30) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20">Cooling</span>
+  return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-coral/10 text-coral border border-coral/20">At risk</span>
+}
 
 const resizeImage = (file, w, h) => new Promise((resolve) => {
   const reader = new FileReader()
@@ -157,6 +209,9 @@ export default function Dashboard() {
   const [qrUrl, setQrUrl] = useState(null)
   const [qrLoading, setQrLoading] = useState(false)
   const [stats, setStats] = useState(null)
+  const [analytics, setAnalytics] = useState(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [customerSort, setCustomerSort] = useState('last_seen')
   const [settingsForm, setSettingsForm] = useState(null)
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
@@ -179,6 +234,13 @@ export default function Dashboard() {
       api.get(`/businesses/${biz.id}/stats`)
         .then(r => setStats(r.data))
         .catch(() => {})
+    }
+    if (tab === 'analytics' && biz && !analytics) {
+      setAnalyticsLoading(true)
+      api.get(`/businesses/${biz.id}/analytics`)
+        .then(r => setAnalytics(r.data))
+        .catch(() => {})
+        .finally(() => setAnalyticsLoading(false))
     }
   }, [tab, biz])
 
@@ -458,6 +520,218 @@ export default function Dashboard() {
                 <p className="font-display font-bold text-text mb-1">All caught up</p>
                 <p className="text-text-muted text-sm">No pending confirmations</p>
               </div>
+            )}
+          </div>
+        )}
+
+        {/* ANALYTICS */}
+        {tab === 'analytics' && (
+          <div className="flex flex-col gap-8">
+            <div>
+              <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em' }}>Analytics</h1>
+              <p className="text-text-muted text-sm">Insights your competitors don't have</p>
+            </div>
+
+            {analyticsLoading ? (
+              <div className="flex flex-col gap-4">
+                {[1,2,3].map(i => <div key={i} className="card h-36 animate-pulse" />)}
+              </div>
+            ) : !analytics ? (
+              <div className="card p-12 text-center text-text-muted">
+                <p>Could not load analytics</p>
+              </div>
+            ) : (
+              <>
+                {/* KPI ROW */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { label: 'New customers', value: parseInt(analytics.newVsReturning?.new_customers || 0), sub: 'this month', color: '#2767FF' },
+                    { label: 'Returning', value: parseInt(analytics.newVsReturning?.returning_customers || 0), sub: 'this month', color: '#22C55E' },
+                    { label: 'This week', value: parseInt(analytics.weekly[analytics.weekly.length - 1]?.count || 0),
+                      sub: analytics.weekChange != null ? `${analytics.weekChange >= 0 ? '+' : ''}${analytics.weekChange}% vs last week` : 'completions',
+                      color: analytics.weekChange > 0 ? '#22C55E' : analytics.weekChange < 0 ? '#FF4D3B' : '#6B7A99' },
+                    { label: 'At risk', value: analytics.atRisk.length, sub: 'customers fading', color: analytics.atRisk.length > 0 ? '#FF8A3D' : '#22C55E' },
+                  ].map(s => (
+                    <div key={s.label} className="card p-4">
+                      <p className="font-display font-black" style={{ fontSize: 'clamp(1.75rem,4vw,2.25rem)', letterSpacing: '-0.04em', color: s.color }}>{s.value}</p>
+                      <p className="text-text text-xs font-semibold mt-0.5">{s.label}</p>
+                      <p className="text-text-muted text-[11px] mt-0.5">{s.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* BENCHMARK — the addictive section */}
+                {analytics.benchmark && (
+                  <div className="rounded-2xl p-6 relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, #0A1B33 0%, #0F2444 100%)', border: '1px solid rgba(39,103,255,0.2)' }}>
+                    <div className="absolute top-0 right-0 w-48 h-48 pointer-events-none"
+                      style={{ background: 'radial-gradient(circle, rgba(39,103,255,0.12) 0%, transparent 70%)', transform: 'translate(20%,-20%)' }} />
+                    <div className="relative">
+                      <p className="text-xs font-display font-black uppercase tracking-widest mb-1" style={{ color: 'rgba(245,166,35,0.8)' }}>Benchmark</p>
+                      <p className="font-display font-black text-white mb-5" style={{ fontSize: 'clamp(1.1rem,2.5vw,1.4rem)', letterSpacing: '-0.025em', lineHeight: 1.2 }}>
+                        How do you compare to other {analytics.benchmark.category}s?
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {[
+                          { label: 'You', value: parseFloat(analytics.benchmark.my_avg || 0), color: '#2767FF', highlight: true },
+                          { label: `Avg ${analytics.benchmark.category}`, value: parseFloat(analytics.benchmark.category_avg || 0), color: 'rgba(255,255,255,0.4)' },
+                          { label: 'Top 20%', value: parseFloat(analytics.benchmark.top_avg || 0), color: '#F5A623' },
+                        ].map(row => {
+                          const max = Math.max(parseFloat(analytics.benchmark.top_avg || 1), parseFloat(analytics.benchmark.my_avg || 0), 1)
+                          const pct = Math.round((row.value / max) * 100)
+                          return (
+                            <div key={row.label}>
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-xs font-semibold" style={{ color: row.highlight ? 'white' : 'rgba(255,255,255,0.5)' }}>{row.label}</span>
+                                <span className="font-display font-black text-sm tabular-nums" style={{ color: row.color }}>{row.value} <span className="text-xs font-normal opacity-60">completions/customer</span></span>
+                              </div>
+                              <div className="h-2 rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: row.color }} />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      {parseFloat(analytics.benchmark.my_avg) < parseFloat(analytics.benchmark.category_avg) && (
+                        <p className="mt-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          💡 Adding more challenges or a visit-based challenge could significantly improve your score.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* CHARTS ROW */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="card p-5">
+                    <p className="font-display font-bold text-text text-sm mb-0.5">Weekly trend</p>
+                    <p className="text-text-muted text-xs mb-4">Confirmed completions · last 8 weeks</p>
+                    <WeeklyChart weekly={analytics.weekly} />
+                  </div>
+                  <div className="card p-5">
+                    <p className="font-display font-bold text-text text-sm mb-0.5">Busiest days</p>
+                    <p className="text-text-muted text-xs mb-4">All-time completions by day of week</p>
+                    <DayChart dayOfWeek={analytics.dayOfWeek} />
+                  </div>
+                </div>
+
+                {/* CHALLENGE PERFORMANCE */}
+                {analytics.challengePerf.length > 0 && (
+                  <div className="card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border">
+                      <p className="font-display font-bold text-text text-sm">Challenge performance</p>
+                      <p className="text-text-muted text-xs mt-0.5">Which challenges are driving loyalty</p>
+                    </div>
+                    {analytics.challengePerf.map((c, i) => {
+                      const total = analytics.challengePerf.reduce((s, x) => s + parseInt(x.total_completions), 0)
+                      const pct = total > 0 ? Math.round((parseInt(c.total_completions) / total) * 100) : 0
+                      return (
+                        <div key={c.id} className={`flex items-center gap-4 px-5 py-3.5 ${i < analytics.challengePerf.length - 1 ? 'border-b border-border' : ''}`}>
+                          <div className="w-7 text-center flex-shrink-0">
+                            {i === 0 ? <span>🏆</span> : <span className="text-text-faint text-sm font-mono">{i + 1}</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-text truncate">{c.title}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="flex-1 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                                <div className="h-full rounded-full bg-blue transition-all" style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="text-[11px] text-text-muted flex-shrink-0">{pct}%</span>
+                            </div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <p className="font-display font-black text-text tabular-nums">{c.total_completions}</p>
+                            <p className="text-[10px] text-text-muted">{c.unique_customers} customers</p>
+                          </div>
+                          {!c.is_active && <span className="badge-coral text-[10px] flex-shrink-0">Paused</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* AT-RISK ALERT */}
+                {analytics.atRisk.length > 0 && (
+                  <div className="rounded-2xl border border-coral/25 overflow-hidden" style={{ background: 'rgba(255,77,59,0.03)' }}>
+                    <div className="px-5 py-4 border-b border-coral/15 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-coral/10 flex items-center justify-center flex-shrink-0">
+                        <span style={{ fontSize: 16 }}>⚠️</span>
+                      </div>
+                      <div>
+                        <p className="font-display font-bold text-text text-sm">{analytics.atRisk.length} customer{analytics.atRisk.length !== 1 ? 's' : ''} going cold</p>
+                        <p className="text-text-muted text-xs">Completed a challenge but haven't been back in 21+ days</p>
+                      </div>
+                    </div>
+                    {analytics.atRisk.slice(0, 5).map((c, i) => (
+                      <div key={c.id} className={`flex items-center gap-3 px-5 py-3 ${i < Math.min(analytics.atRisk.length, 5) - 1 ? 'border-b border-coral/10' : ''}`}>
+                        <div className="w-9 h-9 rounded-xl bg-coral/10 flex items-center justify-center font-display font-black text-coral text-sm flex-shrink-0 overflow-hidden">
+                          {c.avatar_url ? <img src={c.avatar_url} className="w-full h-full object-cover" alt="" /> : c.full_name?.[0]}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-text truncate">{c.full_name}</p>
+                          <p className="text-xs text-text-muted">{c.total_completions} challenge{c.total_completions !== '1' ? 's' : ''} completed</p>
+                        </div>
+                        <span className="text-xs font-bold text-coral flex-shrink-0">{Math.round(c.days_away)}d ago</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* CUSTOMER DIRECTORY */}
+                {analytics.customers.length > 0 && (
+                  <div className="card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <div>
+                        <p className="font-display font-bold text-text text-sm">Customer directory</p>
+                        <p className="text-text-muted text-xs mt-0.5">{analytics.customers.length} total customers</p>
+                      </div>
+                      <select
+                        className="input text-xs h-8 w-36"
+                        value={customerSort}
+                        onChange={e => setCustomerSort(e.target.value)}>
+                        <option value="last_seen">Recent first</option>
+                        <option value="total_completions">Most completions</option>
+                        <option value="points_earned">Most points</option>
+                      </select>
+                    </div>
+                    <div style={{ maxHeight: 420, overflowY: 'auto' }}>
+                      {[...analytics.customers].sort((a, b) => {
+                        if (customerSort === 'last_seen') return new Date(b.last_seen) - new Date(a.last_seen)
+                        if (customerSort === 'total_completions') return parseInt(b.total_completions) - parseInt(a.total_completions)
+                        return parseInt(b.points_earned) - parseInt(a.points_earned)
+                      }).map((c, i, arr) => (
+                        <div key={c.id} className={`flex items-center gap-3 px-5 py-3.5 hover:bg-surface/50 transition-colors ${i < arr.length - 1 ? 'border-b border-border' : ''}`}>
+                          <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0 overflow-hidden">
+                            {c.avatar_url ? <img src={c.avatar_url} className="w-full h-full object-cover" alt="" /> : c.full_name?.[0]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-text truncate">{c.full_name}</p>
+                            <p className="text-xs text-text-muted">Last seen {new Date(c.last_seen).toLocaleDateString()}</p>
+                          </div>
+                          <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="text-right hidden sm:block">
+                              <p className="font-display font-black text-text text-sm tabular-nums">{c.total_completions}</p>
+                              <p className="text-[10px] text-text-muted">challenges</p>
+                            </div>
+                            <div className="text-right hidden sm:block">
+                              <p className="font-display font-black text-amber text-sm tabular-nums">{c.points_earned}</p>
+                              <p className="text-[10px] text-text-muted">pts earned</p>
+                            </div>
+                            <CustomerStatus lastSeen={c.last_seen} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {analytics.customers.length === 0 && (
+                  <div className="card p-12 text-center">
+                    <p className="font-display font-bold text-text mb-1">No data yet</p>
+                    <p className="text-text-muted text-sm">Analytics will populate once customers start completing challenges</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
