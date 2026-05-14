@@ -13,7 +13,66 @@ const NAV = [
   { id: 'businesses', label: 'Businesses', icon: IcStore },
   { id: 'users',      label: 'Users',      icon: IcUsers },
   { id: 'cities',     label: 'Cities',     icon: IcMapPin },
+  { id: 'templates',  label: 'Templates',  icon: IcAward },
 ]
+
+const REWARD_TYPES = ['free_item', 'discount', 'upgrade', 'points']
+const CATEGORIES = ['', 'cafe', 'restaurant', 'salon', 'hotel', 'gym']
+
+const BLANK_TEMPLATE = {
+  title: '', description: '', rewardTitle: '', rewardDescription: '',
+  rewardType: 'free_item', discountPercent: '', pointsValue: '0',
+  icon: '🎯', category: '', tags: '', sortOrder: '0',
+}
+
+function TemplateCard({ t, onEdit, onToggle, onDelete }) {
+  return (
+    <div className={`rounded-2xl border p-4 flex flex-col gap-3 transition-opacity ${t.is_active ? 'border-border bg-white' : 'border-border bg-surface opacity-60'}`}
+      style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
+      <div className="flex items-start gap-3">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-surface border border-border">
+          {t.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-display font-bold text-text text-sm leading-tight">{t.title}</p>
+          {t.category && (
+            <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md mt-1"
+              style={{ background: '#2767FF18', color: '#2767FF' }}>{t.category}</span>
+          )}
+        </div>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${t.is_active ? 'bg-green-stamp/10 text-green-stamp' : 'bg-coral/10 text-coral'}`}>
+          {t.is_active ? 'Active' : 'Off'}
+        </span>
+      </div>
+      <div className="text-xs text-text-muted leading-relaxed line-clamp-2">{t.description || '—'}</div>
+      <div className="rounded-xl border border-amber/20 bg-amber/5 px-3 py-2">
+        <p className="text-[10px] font-display font-black uppercase tracking-widest text-amber mb-0.5">Reward</p>
+        <p className="text-xs font-bold text-text">{t.reward_title}</p>
+        <p className="text-xs text-text-muted">{t.reward_type} · {t.points_value} pts</p>
+      </div>
+      {t.tags?.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {t.tags.map(tag => (
+            <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-surface border border-border text-text-muted font-mono">{tag}</span>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-2 pt-1 border-t border-border">
+        <button onClick={() => onEdit(t)} className="text-xs font-bold text-blue hover:underline flex items-center gap-1">
+          <IcPencil size={11} /> Edit
+        </button>
+        <button onClick={() => onToggle(t.id, t.title)}
+          className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${t.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green-stamp/10 text-green-stamp hover:bg-green-stamp/20'}`}>
+          {t.is_active ? 'Deactivate' : 'Activate'}
+        </button>
+        <button onClick={() => onDelete(t.id, t.title)}
+          className="ml-auto text-xs font-bold text-text-muted hover:text-coral transition-colors px-2 py-1 rounded-lg hover:bg-coral/10">
+          <IcX size={11} />
+        </button>
+      </div>
+    </div>
+  )
+}
 
 const PLAN_COLORS = { free: '#9CA3AF', starter: '#2767FF', pro: '#A78BFA', agency: '#F59E0B' }
 
@@ -81,6 +140,12 @@ export default function Admin() {
   const [showCityForm, setShowCityForm] = useState(false)
   const [cityForm, setCityForm] = useState({ name: '', country: '', slug: '', latitude: '', longitude: '' })
 
+  const [templates, setTemplates] = useState([])
+  const [templatesLoading, setTemplatesLoading] = useState(false)
+  const [showTemplateForm, setShowTemplateForm] = useState(false)
+  const [editingTemplate, setEditingTemplate] = useState(null)
+  const [templateForm, setTemplateForm] = useState(BLANK_TEMPLATE)
+
   useEffect(() => {
     if (user && user.role !== 'admin') { navigate('/'); return }
     if (!user) return
@@ -125,6 +190,73 @@ export default function Admin() {
   useEffect(() => { if (tab === 'businesses') loadBusinesses() }, [tab])
   useEffect(() => { if (tab === 'users') loadUsers() }, [tab])
   useEffect(() => { if (tab === 'cities') loadCities() }, [tab])
+  useEffect(() => { if (tab === 'templates') loadTemplates() }, [tab])
+
+  const loadTemplates = async () => {
+    setTemplatesLoading(true)
+    try { const { data } = await api.get('/admin/templates'); setTemplates(data) } catch {}
+    setTemplatesLoading(false)
+  }
+
+  const openNewTemplate = () => {
+    setEditingTemplate(null)
+    setTemplateForm(BLANK_TEMPLATE)
+    setShowTemplateForm(true)
+  }
+
+  const openEditTemplate = (t) => {
+    setEditingTemplate(t)
+    setTemplateForm({
+      title: t.title, description: t.description || '', rewardTitle: t.reward_title,
+      rewardDescription: t.reward_description || '', rewardType: t.reward_type,
+      discountPercent: t.discount_percent || '', pointsValue: t.points_value,
+      icon: t.icon, category: t.category || '', tags: (t.tags || []).join(', '),
+      sortOrder: t.sort_order,
+    })
+    setShowTemplateForm(true)
+  }
+
+  const saveTemplate = async (e) => {
+    e.preventDefault()
+    const payload = {
+      ...templateForm,
+      discountPercent: templateForm.discountPercent ? parseInt(templateForm.discountPercent) : null,
+      pointsValue: parseInt(templateForm.pointsValue) || 0,
+      sortOrder: parseInt(templateForm.sortOrder) || 0,
+      tags: templateForm.tags ? templateForm.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      category: templateForm.category || null,
+    }
+    try {
+      if (editingTemplate) {
+        const { data } = await api.put(`/admin/templates/${editingTemplate.id}`, payload)
+        setTemplates(ts => ts.map(t => t.id === editingTemplate.id ? data : t))
+        toast('Template updated', 'success')
+      } else {
+        const { data } = await api.post('/admin/templates', payload)
+        setTemplates(ts => [...ts, data])
+        toast('Template created', 'success')
+      }
+      setShowTemplateForm(false)
+      setEditingTemplate(null)
+    } catch (err) { toast(err.response?.data?.error || 'Failed', 'error') }
+  }
+
+  const toggleTemplate = async (id, title) => {
+    try {
+      const { data } = await api.put(`/admin/templates/${id}/toggle`)
+      setTemplates(ts => ts.map(t => t.id === id ? { ...t, is_active: data.is_active } : t))
+      toast(`${title} ${data.is_active ? 'activated' : 'deactivated'}`, 'success')
+    } catch { toast('Failed', 'error') }
+  }
+
+  const deleteTemplate = async (id, title) => {
+    if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return
+    try {
+      await api.delete(`/admin/templates/${id}`)
+      setTemplates(ts => ts.filter(t => t.id !== id))
+      toast(`${title} deleted`, 'success')
+    } catch { toast('Failed', 'error') }
+  }
 
   const toggleBiz = async (id, name) => {
     try {
@@ -516,6 +648,134 @@ export default function Admin() {
                   </table>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* ── TEMPLATES ── */}
+          {tab === 'templates' && (
+            <div>
+              <div className="flex items-center justify-between mb-6 gap-4">
+                <div>
+                  <h1 className="font-display font-black text-text" style={{ fontSize: '1.6rem', letterSpacing: '-0.03em' }}>Challenge Templates</h1>
+                  <p className="text-sm text-text-muted mt-0.5">Templates business owners can pick when creating a challenge.</p>
+                </div>
+                <button onClick={openNewTemplate} className="btn-primary text-sm gap-2 flex-shrink-0">
+                  <IcPlus size={14} /> New template
+                </button>
+              </div>
+
+              {showTemplateForm && (
+                <form onSubmit={saveTemplate}
+                  className="rounded-2xl border border-blue/25 bg-blue/5 p-5 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <p className="text-sm font-display font-bold text-text">
+                      {editingTemplate ? `Edit — ${editingTemplate.title}` : 'New template'}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-20 flex-shrink-0">
+                      <label className="block text-xs text-text-muted mb-1">Icon</label>
+                      <input className="input h-9 text-xl text-center" maxLength={4}
+                        value={templateForm.icon}
+                        onChange={e => setTemplateForm(f => ({ ...f, icon: e.target.value }))} />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs text-text-muted mb-1">Title *</label>
+                      <input className="input h-9 text-sm" placeholder="e.g. Visit 5 times" required
+                        value={templateForm.title} onChange={e => setTemplateForm(f => ({ ...f, title: e.target.value }))} />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Category</label>
+                    <select className="input h-9 text-sm" value={templateForm.category}
+                      onChange={e => setTemplateForm(f => ({ ...f, category: e.target.value }))}>
+                      <option value="">All categories</option>
+                      {CATEGORIES.filter(c => c).map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-xs text-text-muted mb-1">Description</label>
+                    <textarea className="input text-sm resize-none" rows={2} placeholder="Short challenge description shown to owners..."
+                      value={templateForm.description}
+                      onChange={e => setTemplateForm(f => ({ ...f, description: e.target.value }))} />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Reward title *</label>
+                    <input className="input h-9 text-sm" placeholder="e.g. Free coffee" required
+                      value={templateForm.rewardTitle} onChange={e => setTemplateForm(f => ({ ...f, rewardTitle: e.target.value }))} />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Reward type</label>
+                    <select className="input h-9 text-sm" value={templateForm.rewardType}
+                      onChange={e => setTemplateForm(f => ({ ...f, rewardType: e.target.value }))}>
+                      {REWARD_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+
+                  {templateForm.rewardType === 'discount' && (
+                    <div>
+                      <label className="block text-xs text-text-muted mb-1">Discount %</label>
+                      <input className="input h-9 text-sm" type="number" min={1} max={100} placeholder="20"
+                        value={templateForm.discountPercent}
+                        onChange={e => setTemplateForm(f => ({ ...f, discountPercent: e.target.value }))} />
+                    </div>
+                  )}
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Default points</label>
+                    <input className="input h-9 text-sm" type="number" min={0} placeholder="100"
+                      value={templateForm.pointsValue}
+                      onChange={e => setTemplateForm(f => ({ ...f, pointsValue: e.target.value }))} />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Tags (comma-separated)</label>
+                    <input className="input h-9 text-sm" placeholder="loyalty, repeat, morning"
+                      value={templateForm.tags} onChange={e => setTemplateForm(f => ({ ...f, tags: e.target.value }))} />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-text-muted mb-1">Sort order</label>
+                    <input className="input h-9 text-sm" type="number" min={0} placeholder="0"
+                      value={templateForm.sortOrder}
+                      onChange={e => setTemplateForm(f => ({ ...f, sortOrder: e.target.value }))} />
+                  </div>
+
+                  <div className="md:col-span-2 flex gap-3 pt-1">
+                    <button type="submit" className="btn-primary text-sm">
+                      {editingTemplate ? 'Save changes' : 'Create template'}
+                    </button>
+                    <button type="button" onClick={() => { setShowTemplateForm(false); setEditingTemplate(null) }}
+                      className="btn-secondary text-sm">Cancel</button>
+                  </div>
+                </form>
+              )}
+
+              {templatesLoading ? (
+                <div className="flex items-center justify-center py-24">
+                  <div className="w-6 h-6 border-2 border-blue border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border py-16 text-center">
+                  <p className="text-3xl mb-3">📋</p>
+                  <p className="font-display font-bold text-text">No templates yet</p>
+                  <p className="text-sm text-text-muted mt-1">Create your first template to help business owners get started quickly.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {templates.map(t => (
+                    <TemplateCard key={t.id} t={t}
+                      onEdit={openEditTemplate}
+                      onToggle={toggleTemplate}
+                      onDelete={deleteTemplate} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

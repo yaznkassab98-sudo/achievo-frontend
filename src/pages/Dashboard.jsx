@@ -95,6 +95,63 @@ const resizeImage = (file, w, h) => new Promise((resolve) => {
   reader.readAsDataURL(file)
 })
 
+function TemplatePicker({ templates, onPick, onScratch, onClose }) {
+  const byCategory = templates.reduce((acc, t) => {
+    const key = t.category || 'general'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(t)
+    return acc
+  }, {})
+
+  return (
+    <div className="card p-6 flex flex-col gap-5 border-blue/20">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="font-display font-bold text-text">Start from a template</h3>
+          <p className="text-xs text-text-muted mt-0.5">Pick one and customise, or start blank</p>
+        </div>
+        <button onClick={onClose} className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors flex-shrink-0">
+          <IcX size={14} />
+        </button>
+      </div>
+      {Object.keys(byCategory).length === 0 ? (
+        <p className="text-sm text-text-muted text-center py-4">No templates available</p>
+      ) : (
+        <div className="flex flex-col gap-5 max-h-96 overflow-y-auto pr-1">
+          {Object.entries(byCategory).map(([cat, items]) => (
+            <div key={cat}>
+              <p className="text-[10px] font-display font-black uppercase tracking-widest text-text-faint mb-2">{cat}</p>
+              <div className="flex flex-col gap-2">
+                {items.map(t => (
+                  <button key={t.id} onClick={() => onPick(t)}
+                    className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-surface hover:border-blue/40 hover:bg-blue/5 transition-all text-left group">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-white border border-border group-hover:border-blue/20">
+                      {t.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-display font-bold text-text">{t.title}</p>
+                      <p className="text-xs text-text-muted truncate">{t.description}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-xs font-bold text-amber">{t.reward_title}</p>
+                      <p className="text-[11px] text-text-muted">{t.points_value} pts</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-3 pt-1 border-t border-border">
+        <button onClick={onScratch} className="btn-secondary text-sm flex-1 justify-center">
+          Start from scratch
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ChallengeForm({ biz, onSave, initial, onCancel }) {
   const [f, setF] = useState(initial || { title: '', description: '', type: 'review', rewardTitle: '', rewardType: 'free_item', pointsValue: 100 })
   const [saving, setSaving] = useState(false)
@@ -202,6 +259,8 @@ export default function Dashboard() {
   const [staff, setStaff] = useState([])
   const [pending, setPending] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false)
+  const [templates, setTemplates] = useState([])
   const [editChallenge, setEditChallenge] = useState(null)
   const [staffForm, setStaffForm] = useState({ name: '', role: 'cashier', pinCode: '' })
   const [loading, setLoading] = useState(true)
@@ -228,6 +287,12 @@ export default function Dashboard() {
         .finally(() => setQrLoading(false))
     }
   }, [tab, biz])
+
+  useEffect(() => {
+    if (tab === 'challenges' && templates.length === 0) {
+      api.get('/templates').then(r => setTemplates(r.data)).catch(() => {})
+    }
+  }, [tab])
 
   useEffect(() => {
     if (tab === 'overview' && biz && !stats) {
@@ -741,12 +806,32 @@ export default function Dashboard() {
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,3vw,2rem)', letterSpacing: '-0.03em' }}>Challenges</h1>
-              {!showForm && !editChallenge && (
-                <button onClick={() => setShowForm(true)} className="btn-primary text-sm px-4 py-2.5">
+              {!showForm && !editChallenge && !showTemplatePicker && (
+                <button onClick={() => setShowTemplatePicker(true)} className="btn-primary text-sm px-4 py-2.5">
                   <IcPlus size={14} /> New
                 </button>
               )}
             </div>
+
+            {showTemplatePicker && !showForm && !editChallenge && (
+              <TemplatePicker
+                templates={templates}
+                onPick={(t) => {
+                  setEditChallenge({
+                    title: t.title,
+                    description: t.description || '',
+                    type: 'visit',
+                    rewardTitle: t.reward_title,
+                    rewardType: t.reward_type,
+                    pointsValue: t.points_value,
+                  })
+                  setShowTemplatePicker(false)
+                  setShowForm(false)
+                }}
+                onScratch={() => { setShowTemplatePicker(false); setShowForm(true) }}
+                onClose={() => setShowTemplatePicker(false)}
+              />
+            )}
 
             {(showForm || editChallenge) && (
               <ChallengeForm biz={biz} initial={editChallenge}
@@ -755,7 +840,7 @@ export default function Dashboard() {
                   else setChallenges(cs => cs.map(c => c.id === data.id ? data : c))
                   setShowForm(false); setEditChallenge(null)
                 }}
-                onCancel={() => { setShowForm(false); setEditChallenge(null) }}
+                onCancel={() => { setShowForm(false); setEditChallenge(null); setShowTemplatePicker(false) }}
               />
             )}
 
