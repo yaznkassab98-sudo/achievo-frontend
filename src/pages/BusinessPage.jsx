@@ -197,6 +197,24 @@ export default function BusinessPage() {
           </div>
         </div>
 
+        {(parseInt(biz.weekly_completions) > 0 || parseInt(biz.total_completions) > 0) && (
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            {parseInt(biz.weekly_completions) > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-stamp animate-pulse flex-shrink-0" />
+                <span className="text-sm font-semibold text-green-stamp">
+                  {biz.weekly_completions} {parseInt(biz.weekly_completions) === 1 ? 'person' : 'people'} active this week
+                </span>
+              </div>
+            )}
+            {parseInt(biz.total_completions) > 0 && (
+              <span className="text-xs text-text-muted">
+                · {biz.total_completions} challenges completed all-time
+              </span>
+            )}
+          </div>
+        )}
+
         {biz.description && (
           <p className="text-text-muted text-sm leading-relaxed mb-6">{biz.description}</p>
         )}

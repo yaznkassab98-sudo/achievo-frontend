@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  IcAward, IcStar, IcLogOut, IcArrowRight, IcCheck, IcClock, IcGift, IcPencil,
+  IcAward, IcStar, IcLogOut, IcArrowRight, IcCheck, IcClock, IcGift, IcPencil, IcUsers, IcZap,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
@@ -27,8 +27,12 @@ export default function Wallet() {
   const [rewards, setRewards] = useState([])
   const [completions, setCompletions] = useState([])
   const [achievements, setAchievements] = useState([])
+  const [referral, setReferral] = useState(null)
+  const [copied, setCopied] = useState(false)
   const [tab, setTab] = useState('rewards')
   const [loading, setLoading] = useState(true)
+
+  const frontendUrl = window.location.origin
 
   useEffect(() => {
     fetchMe()
@@ -36,10 +40,19 @@ export default function Wallet() {
       api.get('/rewards/mine'),
       api.get('/completions/mine'),
       api.get('/completions/achievements'),
-    ]).then(([r, c, a]) => {
-      setRewards(r.data); setCompletions(c.data); setAchievements(a.data); setLoading(false)
+      api.get('/referrals/mine'),
+    ]).then(([r, c, a, ref]) => {
+      setRewards(r.data); setCompletions(c.data); setAchievements(a.data)
+      setReferral(ref.data); setLoading(false)
     })
   }, [])
+
+  const copyReferralLink = () => {
+    if (!referral?.referral_code) return
+    navigator.clipboard.writeText(`${frontendUrl}/auth?ref=${referral.referral_code}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const useReward = async (id) => {
     if (!confirm('Mark this reward as used?')) return
@@ -138,6 +151,51 @@ export default function Wallet() {
                     <p className="text-xs font-display font-black text-text leading-none" style={{ color: a.color }}>{a.label}</p>
                     <p className="text-[10px] text-text-muted mt-0.5 leading-none">{a.desc}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* REFERRAL CARD */}
+        {referral?.referral_code && (
+          <div className="rounded-2xl p-5 mb-6 border border-blue/20 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #0A1B33 0%, #0F2444 100%)' }}>
+            <div className="absolute top-0 right-0 w-40 h-40 pointer-events-none"
+              style={{ background: 'radial-gradient(circle, rgba(39,103,255,0.15) 0%, transparent 70%)', transform: 'translate(20%, -20%)' }} />
+            <div className="relative flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue/20 flex items-center justify-center flex-shrink-0">
+                <IcUsers size={18} className="text-blue" style={{ color: '#7BA7FF' }} />
+              </div>
+              <div>
+                <p className="font-display font-bold text-white text-sm">Invite friends, earn points</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  Get +200 pts when a friend completes their first challenge
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex-1 rounded-xl px-3 py-2.5 font-mono text-sm font-bold tracking-widest"
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                {frontendUrl}/auth?ref={referral.referral_code}
+              </div>
+              <button onClick={copyReferralLink}
+                className="flex-shrink-0 px-4 py-2.5 rounded-xl font-display font-bold text-sm transition-all active:scale-95"
+                style={{ background: copied ? '#22C55E' : '#2767FF', color: 'white' }}>
+                {copied ? '✓ Copied!' : 'Copy'}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              {[
+                { label: 'Friends invited', value: referral.referred_count || 0, icon: IcUsers },
+                { label: 'Converted', value: referral.converted_count || 0, icon: IcZap },
+                { label: 'Points earned', value: (referral.converted_count || 0) * 200, icon: IcStar },
+              ].map(({ label, value, icon: Icon }) => (
+                <div key={label} className="flex-1 text-center">
+                  <p className="font-display font-black text-white" style={{ fontSize: '1.2rem', letterSpacing: '-0.03em' }}>{value}</p>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{label}</p>
                 </div>
               ))}
             </div>

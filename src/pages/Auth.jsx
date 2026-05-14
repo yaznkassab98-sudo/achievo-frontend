@@ -134,6 +134,7 @@ export default function Auth() {
 
   const [mode, setMode] = useState(params.get('mode') === 'signup' ? 'signup' : 'login')
   const [role, setRole] = useState(params.get('role') || 'customer')
+  const referralCode = params.get('ref') || null
   const [step, setStep] = useState(params.get('mode') === 'signup' ? 0 : 1)
   const [pendingUser, setPendingUser] = useState(null)
   const [showPw, setShowPw] = useState(false)
@@ -221,6 +222,7 @@ export default function Auth() {
         cityId: form.cityId || null,
         phone: form.phone || null,
         avatarUrl: form.avatarBase64 || null,
+        referralCode: referralCode || undefined,
       })
       setPendingUser({ userId: result.userId, email: result.email })
       setStep(3)

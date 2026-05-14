@@ -6,7 +6,7 @@ import { Html5Qrcode } from 'html5-qrcode'
 import {
   IcSearch, IcMapPin, IcCoffee, IcFood, IcScissors, IcBuilding,
   IcDumbbell, IcBag, IcAward, IcZap, IcQr, IcHash, IcX, IcCamera,
-  IcArrowRight, IcGlobe,
+  IcArrowRight, IcGlobe, IcGift, IcStar,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
@@ -327,11 +327,11 @@ export default function Browse() {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setUserLocation(loc)
         setFlyTarget({ ...loc, zoom: 14 })
-        if (viewMode !== 'map') setViewMode('map')
+        setViewMode('nearby')
       },
       () => {}
     )
-  }, [viewMode])
+  }, [])
 
   const handleGeoSearch = async (e) => {
     e.preventDefault()
@@ -482,8 +482,8 @@ export default function Browse() {
               <IcMapPin size={13} className="text-blue" /> Near me
             </button>
             <div className="flex bg-surface border border-border rounded-xl p-0.5">
-              {[['grid', 'Grid'], ['map', 'Map']].map(([v, l]) => (
-                <button key={v} onClick={() => setViewMode(v)}
+              {[['grid', 'Grid'], ['map', 'Map'], ['nearby', '📍 Nearby']].map(([v, l]) => (
+                <button key={v} onClick={() => { setViewMode(v); if (v === 'nearby' && !userLocation) locateMe() }}
                   className={`px-3 py-1.5 rounded-[10px] text-xs font-display font-bold transition-all ${viewMode === v ? 'bg-white text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
                   {l}
                 </button>
@@ -558,7 +558,12 @@ export default function Browse() {
                             </>
                           )
                         }
-                        <div className="absolute top-3 right-3">
+                        <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                          {parseInt(b.weekly_completions) >= 5 && (
+                            <span className="text-[11px] font-display font-bold px-2.5 py-1 rounded-full bg-coral/90 text-white">
+                              🔥 Trending
+                            </span>
+                          )}
                           <span className="text-[11px] font-display font-bold px-2.5 py-1 rounded-full"
                             style={{ background: `${accent}22`, color: accent, border: `1px solid ${accent}35` }}>
                             {b.challenge_count} {parseInt(b.challenge_count) !== 1 ? 'challenges' : 'challenge'}
@@ -583,6 +588,14 @@ export default function Browse() {
                           {b.country && <span className="text-text-faint text-xs">· {b.country}</span>}
                           {b.distance != null && <span className="text-blue text-xs font-semibold">· {b.distance < 1 ? `${Math.round(b.distance*1000)}m` : `${b.distance.toFixed(1)}km`}</span>}
                         </div>
+                        {parseInt(b.weekly_completions) > 0 && (
+                          <div className="flex items-center gap-1.5 mt-2">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-stamp">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-stamp animate-pulse inline-block" />
+                              {b.weekly_completions} {parseInt(b.weekly_completions) === 1 ? 'person' : 'people'} completed challenges this week
+                            </span>
+                          </div>
+                        )}
                         {b.description && <p className="text-text-muted text-xs leading-relaxed mt-2.5 line-clamp-2">{b.description}</p>}
                       </div>
                     </Link>
@@ -792,6 +805,124 @@ export default function Browse() {
                 })}
               </MapContainer>
             </div>
+          </div>
+        )}
+
+        {/* ── NEARBY FEED ── */}
+        {viewMode === 'nearby' && (
+          <div>
+            {!userLocation ? (
+              <div className="text-center py-24">
+                <div className="w-16 h-16 rounded-2xl bg-blue/10 flex items-center justify-center mx-auto mb-5">
+                  <IcMapPin size={28} className="text-blue" />
+                </div>
+                <p className="font-display font-bold text-text text-lg mb-2">Allow location access</p>
+                <p className="text-text-muted text-sm mb-6 max-w-xs mx-auto">We need your location to show businesses near you</p>
+                <button onClick={locateMe} className="btn-primary px-8 py-3">
+                  <IcMapPin size={15} /> Enable location
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <p className="font-display font-bold text-text">Near you</p>
+                    <p className="text-text-muted text-xs mt-0.5">{bizWithDistance.filter(b => b.distance != null).length} businesses · sorted by distance</p>
+                  </div>
+                  <button onClick={locateMe} className="btn-secondary text-xs px-3 py-1.5 gap-1.5">
+                    <IcMapPin size={12} className="text-blue" /> Refresh
+                  </button>
+                </div>
+
+                {loading ? (
+                  <div className="flex flex-col gap-3">
+                    {Array(5).fill(0).map((_, i) => (
+                      <div key={i} className="card p-4 animate-pulse h-24" />
+                    ))}
+                  </div>
+                ) : bizWithDistance.length === 0 ? (
+                  <div className="text-center py-16 text-text-muted">
+                    <p className="font-display font-bold text-text mb-1">No businesses found nearby</p>
+                    <p className="text-sm">Try expanding your search or changing filters</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {bizWithDistance.map((b, idx) => {
+                      const accent = CAT_ACCENTS[b.category] || '#2767FF'
+                      const challengeCount = parseInt(b.challenge_count) || 0
+                      const totalPoints = parseInt(b.total_points) || 0
+                      const distLabel = b.distance == null ? null
+                        : b.distance < 1 ? `${Math.round(b.distance * 1000)}m`
+                        : `${b.distance.toFixed(1)}km`
+                      return (
+                        <Link key={b.id} to={`/b/${b.slug}`}
+                          className="group flex items-center gap-4 bg-white border border-border rounded-2xl px-4 py-4 transition-all hover:border-blue/20 hover:shadow-md"
+                          style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.05)' }}>
+
+                          {/* Rank */}
+                          <div className="w-7 text-center flex-shrink-0">
+                            {idx < 3 ? (
+                              <span style={{ fontSize: 18 }}>{['🥇','🥈','🥉'][idx]}</span>
+                            ) : (
+                              <span className="font-display font-black text-text-faint text-sm">{idx + 1}</span>
+                            )}
+                          </div>
+
+                          {/* Avatar */}
+                          <div className="w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center font-display font-black text-xl"
+                            style={{ background: `linear-gradient(135deg,${accent}28,${accent}12)`, color: accent, border: `1.5px solid ${accent}20` }}>
+                            {b.logo_url ? <img src={b.logo_url} className="w-full h-full object-cover" alt="" /> : b.name[0]}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-display font-bold text-text truncate" style={{ letterSpacing: '-0.015em' }}>{b.name}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: accent }} />
+                              <span className="text-xs text-text-muted capitalize">{b.category}</span>
+                              {b.city_name && <><span className="text-text-faint text-xs">·</span><span className="text-xs text-text-muted">{b.city_name}</span></>}
+                            </div>
+                            {b.best_reward_title && (
+                              <div className="flex items-center gap-1.5 mt-1.5">
+                                <IcGift size={11} className="text-amber flex-shrink-0" />
+                                <span className="text-xs font-semibold text-amber truncate">{b.best_reward_title}</span>
+                              </div>
+                            )}
+                            {parseInt(b.weekly_completions) > 0 && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-stamp animate-pulse flex-shrink-0" />
+                                <span className="text-[11px] font-semibold text-green-stamp">{b.weekly_completions} this week</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right stats */}
+                          <div className="flex-shrink-0 flex flex-col items-end gap-1.5">
+                            {distLabel && (
+                              <span className="font-display font-black text-blue text-sm" style={{ letterSpacing: '-0.02em' }}>
+                                {distLabel}
+                              </span>
+                            )}
+                            {challengeCount > 0 && (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                                style={{ background: `${accent}18`, color: accent }}>
+                                {challengeCount} {challengeCount === 1 ? 'challenge' : 'challenges'}
+                              </span>
+                            )}
+                            {totalPoints > 0 && (
+                              <div className="flex items-center gap-1">
+                                <IcStar size={9} className="text-amber" />
+                                <span className="text-[10px] font-bold text-amber">{totalPoints} pts</span>
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
