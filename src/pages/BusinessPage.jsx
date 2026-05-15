@@ -267,43 +267,6 @@ export default function BusinessPage() {
             <span className="badge-amber text-xs">{total}</span>
           </div>
 
-          {leaderboard.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <IcStar size={16} className="text-amber" />
-                <h2 className="font-display font-bold text-lg text-text">Top customers</h2>
-              </div>
-              <div className="card overflow-hidden">
-                {leaderboard.map((entry, i) => {
-                  const medals = ['🥇','🥈','🥉']
-                  const isTop = i < 3
-                  return (
-                    <div key={entry.id} className={`flex items-center gap-3 px-4 py-3 border-b border-border last:border-0 ${isTop ? 'bg-amber/[0.02]' : ''}`}>
-                      <span className="w-7 text-center text-sm flex-shrink-0">
-                        {medals[i] || <span className="text-text-faint font-mono text-xs">{i + 1}</span>}
-                      </span>
-                      <div className="w-9 h-9 rounded-full bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0 overflow-hidden border border-blue/15">
-                        {entry.avatar_url
-                          ? <img src={entry.avatar_url} className="w-full h-full object-cover" alt="" />
-                          : entry.full_name?.[0]?.toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-display font-bold text-text truncate">{entry.full_name}</p>
-                        <p className="text-xs text-text-muted">{entry.completions} challenge{entry.completions !== '1' ? 's' : ''} completed</p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-display font-black text-amber tabular-nums" style={{ fontSize: '1rem', letterSpacing: '-0.03em' }}>
-                          {entry.total_points}
-                        </p>
-                        <p className="text-[10px] text-text-faint">pts</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           {!total ? (
             <div className="card p-10 text-center text-text-muted">
               <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-4">
@@ -320,6 +283,130 @@ export default function BusinessPage() {
             </div>
           )}
         </div>
+
+        {/* LEADERBOARD */}
+        {leaderboard.length > 0 && (() => {
+          const userRank = user ? leaderboard.findIndex(e => e.id === user.id) : -1
+          const medals = ['🥇', '🥈', '🥉']
+          const rankColors = ['#F5A623', '#9CA3AF', '#CD7F32']
+
+          return (
+            <div className="mt-10">
+              <div className="rounded-2xl overflow-hidden"
+                style={{ background: 'linear-gradient(160deg, #0A1B33 0%, #0F2444 100%)', border: '1px solid rgba(39,103,255,0.15)' }}>
+                {/* Header */}
+                <div className="px-5 pt-5 pb-4 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(245,166,35,0.15)', border: '1px solid rgba(245,166,35,0.2)' }}>
+                    <IcStar size={15} className="text-amber" />
+                  </div>
+                  <div>
+                    <h2 className="font-display font-black text-white" style={{ letterSpacing: '-0.02em' }}>Leaderboard</h2>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.35)' }}>Top regulars at {biz.name}</p>
+                  </div>
+                  <span className="ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(245,166,35,0.15)', color: '#F5A623', border: '1px solid rgba(245,166,35,0.2)' }}>
+                    Top {leaderboard.length}
+                  </span>
+                </div>
+
+                {/* Top 3 podium */}
+                {leaderboard.length >= 2 && (
+                  <div className="flex items-end justify-center gap-3 px-5 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    {[1, 0, 2].filter(i => leaderboard[i]).map((i) => {
+                      const e = leaderboard[i]
+                      const isMe = user?.id === e.id
+                      const heights = ['h-20', 'h-28', 'h-16']
+                      const podiumHeight = heights[i]
+                      return (
+                        <div key={e.id} className="flex flex-col items-center gap-2 flex-1">
+                          <div className="relative">
+                            {i === 0 && (
+                              <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-lg">👑</span>
+                            )}
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center font-display font-black text-lg overflow-hidden border-2 mx-auto"
+                              style={{ borderColor: rankColors[i], background: 'rgba(255,255,255,0.07)', color: rankColors[i] }}>
+                              {e.avatar_url
+                                ? <img src={e.avatar_url} className="w-full h-full object-cover" alt="" />
+                                : e.full_name?.[0]?.toUpperCase()}
+                            </div>
+                            {isMe && (
+                              <span className="absolute -bottom-1 -right-1 text-[9px] font-black px-1 py-0.5 rounded-full"
+                                style={{ background: '#2767FF', color: 'white' }}>You</span>
+                            )}
+                          </div>
+                          <p className="text-xs font-bold text-center truncate w-full px-1 max-w-[80px]"
+                            style={{ color: isMe ? '#7BA7FF' : 'rgba(255,255,255,0.8)' }}>
+                            {e.full_name?.split(' ')[0]}
+                          </p>
+                          <div className={`w-full ${podiumHeight} rounded-t-xl flex flex-col items-center justify-center gap-0.5`}
+                            style={{ background: i === 0 ? 'rgba(245,166,35,0.2)' : i === 1 ? 'rgba(156,163,175,0.12)' : 'rgba(205,127,50,0.12)', border: `1px solid ${rankColors[i]}25` }}>
+                            <span className="text-lg">{medals[i]}</span>
+                            <p className="font-display font-black tabular-nums" style={{ color: rankColors[i], fontSize: '0.85rem', letterSpacing: '-0.03em' }}>
+                              {e.total_points}
+                            </p>
+                            <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.3)' }}>pts</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Rest of list (4+) */}
+                {leaderboard.slice(3).map((entry, idx) => {
+                  const i = idx + 3
+                  const isMe = user?.id === entry.id
+                  return (
+                    <div key={entry.id}
+                      className="flex items-center gap-3 px-5 py-3"
+                      style={{
+                        borderTop: '1px solid rgba(255,255,255,0.05)',
+                        background: isMe ? 'rgba(39,103,255,0.08)' : 'transparent',
+                      }}>
+                      <span className="w-5 text-center font-mono text-xs flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        {i + 1}
+                      </span>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center font-display font-black text-sm flex-shrink-0 overflow-hidden"
+                        style={{ background: isMe ? 'rgba(39,103,255,0.25)' : 'rgba(255,255,255,0.07)', color: isMe ? '#7BA7FF' : 'rgba(255,255,255,0.6)', border: isMe ? '1px solid rgba(39,103,255,0.3)' : '1px solid rgba(255,255,255,0.08)' }}>
+                        {entry.avatar_url
+                          ? <img src={entry.avatar_url} className="w-full h-full object-cover" alt="" />
+                          : entry.full_name?.[0]?.toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold truncate" style={{ color: isMe ? '#7BA7FF' : 'rgba(255,255,255,0.75)' }}>
+                          {entry.full_name}{isMe ? ' (you)' : ''}
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          {entry.completions} challenge{entry.completions !== '1' ? 's' : ''}
+                        </p>
+                      </div>
+                      <p className="font-display font-black tabular-nums text-sm flex-shrink-0" style={{ color: '#F5A623', letterSpacing: '-0.03em' }}>
+                        {entry.total_points} <span className="text-[10px] font-normal" style={{ color: 'rgba(255,255,255,0.25)' }}>pts</span>
+                      </p>
+                    </div>
+                  )
+                })}
+
+                {/* Current user not on board */}
+                {user && userRank === -1 && (
+                  <div className="px-5 py-4 flex items-center gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(39,103,255,0.05)' }}>
+                    <span className="w-5 text-center text-[11px]" style={{ color: 'rgba(255,255,255,0.25)' }}>—</span>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-display font-black text-sm flex-shrink-0"
+                      style={{ background: 'rgba(39,103,255,0.2)', color: '#7BA7FF', border: '1px solid rgba(39,103,255,0.3)' }}>
+                      {user.full_name?.[0]?.toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold" style={{ color: '#7BA7FF' }}>You</p>
+                      <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Complete a challenge to join the board</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
       </div>
       <BottomNav />
     </div>
