@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   IcAward, IcBarChart, IcUsers, IcQr, IcPlus, IcPencil, IcTrash,
   IcLogOut, IcBell, IcCheck, IcX, IcCopy, IcChevronDown, IcChevronUp,
-  IcCamera, IcSave, IcStar,
+  IcCamera, IcSave, IcStar, IcClock, IcHash, IcInstagram,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
@@ -406,8 +406,31 @@ export default function Dashboard() {
   const [settingsSaving, setSettingsSaving] = useState(false)
   const [logoPreview, setLogoPreview] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
+  const [tagInput, setTagInput] = useState('')
   const logoRef = useRef(null)
   const coverRef = useRef(null)
+
+  const DAYS = [
+    { key: 'mon', label: 'Monday' },
+    { key: 'tue', label: 'Tuesday' },
+    { key: 'wed', label: 'Wednesday' },
+    { key: 'thu', label: 'Thursday' },
+    { key: 'fri', label: 'Friday' },
+    { key: 'sat', label: 'Saturday' },
+    { key: 'sun', label: 'Sunday' },
+  ]
+
+  const addTag = (val) => {
+    const tag = val.trim().toLowerCase()
+    if (!tag || settingsForm.tags.includes(tag) || settingsForm.tags.length >= 10) return
+    setSettingsForm(f => ({ ...f, tags: [...f.tags, tag] }))
+    setTagInput('')
+  }
+
+  const removeTag = (tag) => setSettingsForm(f => ({ ...f, tags: f.tags.filter(t => t !== tag) }))
+
+  const setHour = (day, field, value) =>
+    setSettingsForm(f => ({ ...f, openingHours: { ...f.openingHours, [day]: { ...f.openingHours[day], [field]: value } } }))
 
   useEffect(() => {
     if (tab === 'qr' && biz && !qrUrl) {
@@ -449,10 +472,22 @@ export default function Dashboard() {
       setSettingsForm({
         name: r.data.name || '',
         description: r.data.description || '',
+        tagline: r.data.tagline || '',
         category: r.data.category || 'other',
         address: r.data.address || '',
         phone: r.data.phone || '',
         website: r.data.website || '',
+        instagram: r.data.instagram || '',
+        tags: r.data.tags || [],
+        openingHours: r.data.opening_hours || {
+          mon: { open: '09:00', close: '22:00', closed: false },
+          tue: { open: '09:00', close: '22:00', closed: false },
+          wed: { open: '09:00', close: '22:00', closed: false },
+          thu: { open: '09:00', close: '22:00', closed: false },
+          fri: { open: '09:00', close: '22:00', closed: false },
+          sat: { open: '10:00', close: '23:00', closed: false },
+          sun: { open: '10:00', close: '23:00', closed: false },
+        },
         logoUrl: null,
         coverUrl: null,
       })
@@ -538,10 +573,14 @@ export default function Dashboard() {
       const { data } = await api.put(`/businesses/${biz.id}`, {
         name: settingsForm.name,
         description: settingsForm.description || null,
+        tagline: settingsForm.tagline || null,
         category: settingsForm.category,
         address: settingsForm.address || null,
         phone: settingsForm.phone || null,
         website: settingsForm.website || null,
+        instagram: settingsForm.instagram || null,
+        tags: settingsForm.tags,
+        openingHours: settingsForm.openingHours,
         logoUrl: settingsForm.logoUrl || null,
         coverUrl: settingsForm.coverUrl || null,
       })
@@ -1202,40 +1241,136 @@ export default function Dashboard() {
             </div>
 
             {/* Business info */}
-            <form onSubmit={saveSettings} className="card p-6 flex flex-col gap-4">
-              <h2 className="font-display font-bold text-text">Business info</h2>
-              <div>
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">Business name</label>
-                <input className="input" value={settingsForm.name} onChange={e => setSettingsForm(f => ({ ...f, name: e.target.value }))} required />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">Category</label>
-                <select className="input" value={settingsForm.category} onChange={e => setSettingsForm(f => ({ ...f, category: e.target.value }))}>
-                  {['restaurant','cafe','retail','beauty','fitness','health','entertainment','other'].map(c => (
-                    <option key={c} value={c} className="capitalize">{c}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">Description</label>
-                <textarea className="input min-h-[80px] resize-y" placeholder="Tell customers about your business..."
-                  value={settingsForm.description} onChange={e => setSettingsForm(f => ({ ...f, description: e.target.value }))} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
+            <form onSubmit={saveSettings} className="flex flex-col gap-5">
+
+              {/* Identity */}
+              <div className="card p-6 flex flex-col gap-4">
+                <h2 className="font-display font-bold text-text text-sm">Identity</h2>
                 <div>
-                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Phone</label>
-                  <input className="input" type="tel" placeholder="+1 555 000 0000" value={settingsForm.phone} onChange={e => setSettingsForm(f => ({ ...f, phone: e.target.value }))} />
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Business name</label>
+                  <input className="input" value={settingsForm.name} onChange={e => setSettingsForm(f => ({ ...f, name: e.target.value }))} required />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Website</label>
-                  <input className="input" type="url" placeholder="https://" value={settingsForm.website} onChange={e => setSettingsForm(f => ({ ...f, website: e.target.value }))} />
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">
+                    Tagline <span className="font-normal text-text-faint">(optional · 160 chars)</span>
+                  </label>
+                  <input className="input" maxLength={160} placeholder="Best coffee in the neighbourhood since 2019"
+                    value={settingsForm.tagline} onChange={e => setSettingsForm(f => ({ ...f, tagline: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Category</label>
+                  <select className="input" value={settingsForm.category} onChange={e => setSettingsForm(f => ({ ...f, category: e.target.value }))}>
+                    {['restaurant','cafe','retail','beauty','fitness','health','entertainment','other'].map(c => (
+                      <option key={c} value={c} className="capitalize">{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Description</label>
+                  <textarea className="input min-h-[80px] resize-y text-sm" placeholder="Tell customers about your business..."
+                    value={settingsForm.description} onChange={e => setSettingsForm(f => ({ ...f, description: e.target.value }))} />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">Address</label>
-                <input className="input" placeholder="123 Main St, City" value={settingsForm.address} onChange={e => setSettingsForm(f => ({ ...f, address: e.target.value }))} />
+
+              {/* Contact & links */}
+              <div className="card p-6 flex flex-col gap-4">
+                <h2 className="font-display font-bold text-text text-sm">Contact & links</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted mb-1.5">Phone</label>
+                    <input className="input" type="tel" placeholder="+1 555 000 0000" value={settingsForm.phone} onChange={e => setSettingsForm(f => ({ ...f, phone: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-muted mb-1.5">Website</label>
+                    <input className="input" type="url" placeholder="https://" value={settingsForm.website} onChange={e => setSettingsForm(f => ({ ...f, website: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">
+                    Instagram <span className="font-normal text-text-faint">(handle only)</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-faint text-sm select-none">@</span>
+                    <input className="input pl-7" placeholder="yourbusiness" value={settingsForm.instagram}
+                      onChange={e => setSettingsForm(f => ({ ...f, instagram: e.target.value.replace(/^@/, '') }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Address</label>
+                  <input className="input" placeholder="123 Main St, City" value={settingsForm.address} onChange={e => setSettingsForm(f => ({ ...f, address: e.target.value }))} />
+                </div>
               </div>
-              <button type="submit" disabled={settingsSaving} className="btn-primary justify-center mt-2 disabled:opacity-40">
+
+              {/* Tags / amenities */}
+              <div className="card p-6 flex flex-col gap-4">
+                <div>
+                  <h2 className="font-display font-bold text-text text-sm">Tags & amenities</h2>
+                  <p className="text-xs text-text-muted mt-0.5">Press Enter or comma to add · max 10</p>
+                </div>
+                <div>
+                  <div className="relative">
+                    <IcHash size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-faint" />
+                    <input
+                      className="input pl-8 text-sm"
+                      placeholder="outdoor seating, vegan, parking, delivery..."
+                      value={tagInput}
+                      onChange={e => setTagInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') { e.preventDefault(); addTag(tagInput) }
+                        if (e.key === ',') { e.preventDefault(); addTag(tagInput) }
+                      }}
+                    />
+                  </div>
+                  {settingsForm.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {settingsForm.tags.map(tag => (
+                        <span key={tag} className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-2 border border-border text-xs text-text-muted">
+                          #{tag}
+                          <button type="button" onClick={() => removeTag(tag)} className="text-text-faint hover:text-coral transition-colors">
+                            <IcX size={10} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Opening hours */}
+              <div className="card p-6 flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <IcClock size={14} className="text-blue" />
+                  <h2 className="font-display font-bold text-text text-sm">Opening hours</h2>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {DAYS.map(({ key, label }) => {
+                    const day = settingsForm.openingHours?.[key] || { open: '09:00', close: '22:00', closed: false }
+                    return (
+                      <div key={key} className="grid items-center gap-2" style={{ gridTemplateColumns: '80px 1fr 1fr 40px' }}>
+                        <span className={`text-xs font-medium ${day.closed ? 'text-text-faint' : 'text-text-muted'}`}>{label.slice(0, 3)}</span>
+                        <input
+                          type="time" className={`input text-xs py-1.5 ${day.closed ? 'opacity-30 pointer-events-none' : ''}`}
+                          value={day.open} onChange={e => setHour(key, 'open', e.target.value)} disabled={day.closed}
+                        />
+                        <input
+                          type="time" className={`input text-xs py-1.5 ${day.closed ? 'opacity-30 pointer-events-none' : ''}`}
+                          value={day.close} onChange={e => setHour(key, 'close', e.target.value)} disabled={day.closed}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setHour(key, 'closed', !day.closed)}
+                          className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${day.closed ? 'bg-surface-2 border border-border' : 'bg-blue'}`}
+                        >
+                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${day.closed ? 'translate-x-0.5' : 'translate-x-4'}`} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-[11px] text-text-faint">Toggle to mark a day as closed</p>
+              </div>
+
+              <button type="submit" disabled={settingsSaving} className="btn-primary justify-center disabled:opacity-40">
                 <IcSave size={15} /> {settingsSaving ? 'Saving...' : 'Save changes'}
               </button>
             </form>

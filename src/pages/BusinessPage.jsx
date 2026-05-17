@@ -1,11 +1,29 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { IcArrowLeft, IcMapPin, IcGlobe, IcPhone, IcCheck, IcClock, IcAward, IcStar } from '../components/Icons'
+import { IcArrowLeft, IcMapPin, IcGlobe, IcPhone, IcCheck, IcClock, IcAward, IcStar, IcInstagram, IcHash } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
 import BottomNav from '../components/BottomNav'
 import NotFound from './NotFound'
+
+const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+
+function TodayHours({ hours }) {
+  const todayKey = DAY_KEYS[new Date().getDay()]
+  const today = hours?.[todayKey]
+  if (!today) return null
+  if (today.closed) return (
+    <span className="badge-muted text-xs flex items-center gap-1.5 text-coral border-coral/20">
+      <IcClock size={10} /> Closed today
+    </span>
+  )
+  return (
+    <span className="badge-muted text-xs flex items-center gap-1.5 text-green-stamp border-green-stamp/20">
+      <IcClock size={10} /> {today.open} – {today.close}
+    </span>
+  )
+}
 
 const TYPE_META = {
   review:   { label: 'Review',   color: '#F5A623' },
@@ -193,7 +211,11 @@ export default function BusinessPage() {
             <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,4vw,2rem)', letterSpacing: '-0.03em', lineHeight: 1 }}>
               {biz.name}
             </h1>
-            <p className="text-text-muted text-sm mt-1 capitalize">{biz.category} · {biz.city_name}</p>
+            {biz.tagline
+              ? <p className="text-text-muted text-sm mt-1 leading-snug">{biz.tagline}</p>
+              : <p className="text-text-muted text-sm mt-1 capitalize">{biz.category} · {biz.city_name}</p>
+            }
+            {biz.tagline && <p className="text-text-faint text-xs mt-0.5 capitalize">{biz.category} · {biz.city_name}</p>}
           </div>
         </div>
 
@@ -216,11 +238,11 @@ export default function BusinessPage() {
         )}
 
         {biz.description && (
-          <p className="text-text-muted text-sm leading-relaxed mb-6">{biz.description}</p>
+          <p className="text-text-muted text-sm leading-relaxed mb-4">{biz.description}</p>
         )}
 
         {/* LINKS */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-4">
           {biz.address && (
             <a href={biz.google_maps_url || '#'} target="_blank" rel="noreferrer"
               className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
@@ -233,12 +255,30 @@ export default function BusinessPage() {
               <IcGlobe size={10} /> Website
             </a>
           )}
+          {biz.instagram && (
+            <a href={`https://instagram.com/${biz.instagram}`} target="_blank" rel="noreferrer"
+              className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
+              <IcInstagram size={10} /> @{biz.instagram}
+            </a>
+          )}
           {biz.phone && (
             <a href={`tel:${biz.phone}`} className="badge-muted text-xs flex items-center gap-1.5 hover:border-blue/40 hover:text-text transition-colors">
               <IcPhone size={10} /> {biz.phone}
             </a>
           )}
+          {biz.opening_hours && <TodayHours hours={biz.opening_hours} />}
         </div>
+
+        {/* TAGS */}
+        {biz.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {biz.tags.map(tag => (
+              <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-2 border border-border/60 text-[11px] text-text-faint">
+                <IcHash size={8} />#{tag}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* PROGRESS SUMMARY — only if user is logged in and there are challenges */}
         {user && total > 0 && (
