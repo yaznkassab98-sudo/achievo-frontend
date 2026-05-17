@@ -9,6 +9,135 @@ import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
 
+const ONBOARDING_STEPS = [
+  {
+    id: 'logo',
+    icon: IcCamera,
+    title: 'Add your logo',
+    desc: 'Help customers recognise your business instantly.',
+    tab: 'settings',
+    cta: 'Go to Settings',
+    check: (biz) => !!biz.logo_url,
+  },
+  {
+    id: 'challenge',
+    icon: IcAward,
+    title: 'Create your first challenge',
+    desc: 'Give customers a reason to keep coming back.',
+    tab: 'challenges',
+    cta: 'Create challenge',
+    check: (_biz, challenges) => challenges.length > 0,
+  },
+  {
+    id: 'staff',
+    icon: IcUsers,
+    title: 'Invite a staff member',
+    desc: 'Staff confirm completions on the spot with a PIN.',
+    tab: 'staff',
+    cta: 'Add staff',
+    check: (_biz, _challenges, staff) => staff.length > 0,
+  },
+  {
+    id: 'qr',
+    icon: IcQr,
+    title: 'Share your QR code',
+    desc: 'Print it, stick it at the counter, or share the link.',
+    tab: 'qr',
+    cta: 'Get QR code',
+    check: (_biz, _challenges, _staff, qrShared) => qrShared,
+  },
+]
+
+function OnboardingChecklist({ biz, challenges, staff, qrShared, onNavigate, onDismiss }) {
+  const done = ONBOARDING_STEPS.map(s => s.check(biz, challenges, staff, qrShared))
+  const completedCount = done.filter(Boolean).length
+  const allDone = completedCount === ONBOARDING_STEPS.length
+  const pct = Math.round((completedCount / ONBOARDING_STEPS.length) * 100)
+
+  if (allDone) return (
+    <div className="rounded-2xl border border-green-stamp/25 bg-green-stamp/5 p-5 flex items-center gap-4 mb-8">
+      <div className="w-10 h-10 rounded-xl bg-green-stamp/15 flex items-center justify-center flex-shrink-0">
+        <IcCheck size={20} className="text-green-stamp" />
+      </div>
+      <div className="flex-1">
+        <p className="font-display font-bold text-text">You're all set! 🎉</p>
+        <p className="text-xs text-text-muted mt-0.5">Your business is fully set up and ready for customers.</p>
+      </div>
+      <button onClick={onDismiss} className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors flex-shrink-0">
+        <IcX size={14} />
+      </button>
+    </div>
+  )
+
+  return (
+    <div className="rounded-2xl border border-blue/20 overflow-hidden mb-8"
+      style={{ background: 'linear-gradient(160deg, #0A1B33 0%, #0F2444 100%)' }}>
+      <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-display font-black text-white" style={{ letterSpacing: '-0.02em' }}>
+              Set up your business
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              {completedCount} of {ONBOARDING_STEPS.length} steps complete
+            </p>
+          </div>
+          <button onClick={onDismiss} className="p-1.5 rounded-lg flex-shrink-0 transition-colors"
+            style={{ color: 'rgba(255,255,255,0.3)' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
+            <IcX size={13} />
+          </button>
+        </div>
+        <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: 'linear-gradient(90deg, #2767FF, #7BA7FF)' }} />
+        </div>
+      </div>
+
+      <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        {ONBOARDING_STEPS.map((step, i) => {
+          const isDone = done[i]
+          return (
+            <div key={step.id} className="flex items-center gap-4 px-5 py-4"
+              style={{ background: isDone ? 'rgba(34,197,94,0.04)' : 'transparent' }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all"
+                style={{
+                  background: isDone ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)',
+                  border: isDone ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(255,255,255,0.08)',
+                }}>
+                {isDone
+                  ? <IcCheck size={16} className="text-green-stamp" />
+                  : <step.icon size={15} style={{ color: 'rgba(255,255,255,0.5)' }} />
+                }
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-display font-bold"
+                  style={{ color: isDone ? 'rgba(255,255,255,0.4)' : 'white', textDecoration: isDone ? 'line-through' : 'none' }}>
+                  {step.title}
+                </p>
+                {!isDone && (
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{step.desc}</p>
+                )}
+              </div>
+              {!isDone && (
+                <button
+                  onClick={() => onNavigate(step.tab)}
+                  className="text-xs font-bold px-3 py-1.5 rounded-xl flex-shrink-0 transition-all"
+                  style={{ background: 'rgba(39,103,255,0.25)', color: '#7BA7FF', border: '1px solid rgba(39,103,255,0.3)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(39,103,255,0.4)'; e.currentTarget.style.color = 'white' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(39,103,255,0.25)'; e.currentTarget.style.color = '#7BA7FF' }}>
+                  {step.cta} →
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 const TABS = [
   { id: 'overview',   label: 'Overview',   icon: IcBarChart },
   { id: 'analytics',  label: 'Analytics',  icon: IcStar },
@@ -258,6 +387,8 @@ export default function Dashboard() {
   const [challenges, setChallenges] = useState([])
   const [staff, setStaff] = useState([])
   const [pending, setPending] = useState([])
+  const [qrShared, setQrShared] = useState(false)
+  const [checklistDismissed, setChecklistDismissed] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [templates, setTemplates] = useState([])
@@ -334,6 +465,10 @@ export default function Dashboard() {
       ])
     }).then(([ch, st, pe]) => {
       setChallenges(ch.data); setStaff(st.data); setPending(pe.data); setLoading(false)
+      if (bizData) {
+        setQrShared(localStorage.getItem(`achievo_qr_shared_${bizData.id}`) === 'true')
+        setChecklistDismissed(localStorage.getItem(`achievo_onboarding_dismissed_${bizData.id}`) === 'true')
+      }
     }).catch(err => {
       if (err.response?.status === 404) navigate('/setup')
       else setLoading(false)
@@ -367,6 +502,19 @@ export default function Dashboard() {
   const copyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/b/${biz?.slug}`)
     setCopied(true); setTimeout(() => setCopied(false), 2000)
+    markQrShared()
+  }
+
+  const markQrShared = () => {
+    if (biz?.id) {
+      localStorage.setItem(`achievo_qr_shared_${biz.id}`, 'true')
+      setQrShared(true)
+    }
+  }
+
+  const dismissChecklist = () => {
+    if (biz?.id) localStorage.setItem(`achievo_onboarding_dismissed_${biz.id}`, 'true')
+    setChecklistDismissed(true)
   }
 
   const handleLogoUpload = async (e) => {
@@ -492,6 +640,17 @@ export default function Dashboard() {
               </h1>
               <p className="text-text-muted text-sm">Welcome back, {user?.full_name?.split(' ')[0]}</p>
             </div>
+
+            {!checklistDismissed && (
+              <OnboardingChecklist
+                biz={biz}
+                challenges={challenges}
+                staff={staff}
+                qrShared={qrShared}
+                onNavigate={(t) => setTab(t)}
+                onDismiss={dismissChecklist}
+              />
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -960,7 +1119,8 @@ export default function Dashboard() {
               </div>
 
               {qrUrl && (
-                <a href={qrUrl} download="achievo-qr.png" className="btn-primary w-full justify-center">
+                <a href={qrUrl} download="achievo-qr.png" onClick={markQrShared}
+                  className="btn-primary w-full justify-center">
                   Download QR Code
                 </a>
               )}
