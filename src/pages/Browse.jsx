@@ -436,6 +436,23 @@ export default function Browse() {
         </div>
       </nav>
 
+      {user && !user.city_id && (
+        <div className="border-b border-amber/20 bg-amber/5">
+          <div className="max-w-5xl mx-auto px-4 py-2.5 flex items-center gap-3">
+            <span className="text-lg flex-shrink-0">📍</span>
+            <p className="text-sm text-text flex-1">
+              <span className="font-semibold">Set your city</span>
+              <span className="text-text-muted"> — get a personalised feed of businesses near you</span>
+            </p>
+            <Link to="/profile/edit"
+              className="text-xs font-bold px-3 py-1.5 rounded-xl flex-shrink-0 transition-colors"
+              style={{ background: 'rgba(245,166,35,0.15)', color: '#F5A623', border: '1px solid rgba(245,166,35,0.2)' }}>
+              Pick city →
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-5xl mx-auto px-4 py-6 w-full">
         {/* HEADER ROW */}
         <div className="flex items-center justify-between gap-4 mb-5">

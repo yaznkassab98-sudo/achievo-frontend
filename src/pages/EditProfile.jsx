@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { IcArrowLeft, IcSave, IcCamera } from '../components/Icons'
+import { IcArrowLeft, IcSave, IcCamera, IcCheck } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
@@ -29,8 +29,14 @@ export default function EditProfile() {
   const navigate = useNavigate()
   const [cities, setCities] = useState([])
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState(null)
-  const [form, setForm] = useState({ fullName: '', phone: '', cityId: '', avatarUrl: null })
+  const [form, setForm] = useState({
+    fullName: '', phone: '', cityId: '', bio: '', dateOfBirth: '', avatarUrl: null,
+  })
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [pwSaving, setPwSaving] = useState(false)
+  const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false })
   const avatarInputRef = useRef(null)
 
   useEffect(() => {
@@ -43,6 +49,8 @@ export default function EditProfile() {
         fullName: user.full_name || '',
         phone: user.phone || '',
         cityId: user.city_id || '',
+        bio: user.bio || '',
+        dateOfBirth: user.date_of_birth ? user.date_of_birth.split('T')[0] : '',
         avatarUrl: null,
       })
       setAvatarPreview(user.avatar_url || null)
@@ -50,6 +58,7 @@ export default function EditProfile() {
   }, [user])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const setPw = (k, v) => setPwForm(f => ({ ...f, [k]: v }))
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0]
@@ -59,7 +68,7 @@ export default function EditProfile() {
     set('avatarUrl', base64)
   }
 
-  const submit = async (e) => {
+  const submitProfile = async (e) => {
     e.preventDefault()
     setSaving(true)
     try {
@@ -68,14 +77,39 @@ export default function EditProfile() {
         phone: form.phone || null,
         cityId: form.cityId || null,
         avatarUrl: form.avatarUrl || null,
+        dateOfBirth: form.dateOfBirth || null,
+        bio: form.bio || null,
       })
       await fetchMe()
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
       toast('Profile updated', 'success')
-      navigate('/wallet')
     } catch (err) {
       toast(err.response?.data?.error || 'Failed to update', 'error')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const submitPassword = async (e) => {
+    e.preventDefault()
+    if (pwForm.newPassword !== pwForm.confirmPassword)
+      return toast('New passwords do not match', 'error')
+    if (pwForm.newPassword.length < 8)
+      return toast('Password must be at least 8 characters', 'error')
+    setPwSaving(true)
+    try {
+      await api.put('/auth/profile', {
+        fullName: form.fullName,
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword,
+      })
+      setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+      toast('Password changed', 'success')
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to change password', 'error')
+    } finally {
+      setPwSaving(false)
     }
   }
 
@@ -88,6 +122,13 @@ export default function EditProfile() {
 
   const initials = user?.full_name?.[0]?.toUpperCase() || '?'
 
+  const PwToggle = ({ field }) => (
+    <button type="button" onClick={() => setShowPw(s => ({ ...s, [field]: !s[field] }))}
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted hover:text-text transition-colors font-medium">
+      {showPw[field] ? 'Hide' : 'Show'}
+    </button>
+  )
+
   return (
     <div className="min-h-screen pb-28">
       <nav className="sticky top-0 z-40 border-b border-border/50 backdrop-blur-2xl bg-bg/90">
@@ -99,18 +140,17 @@ export default function EditProfile() {
         </div>
       </nav>
 
-      <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-6">
 
         {/* Avatar */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative group cursor-pointer mb-3" onClick={() => avatarInputRef.current?.click()}>
+        <div className="flex flex-col items-center">
+          <div className="relative group cursor-pointer mb-2" onClick={() => avatarInputRef.current?.click()}>
             <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-border bg-surface-2 flex items-center justify-center transition-all group-hover:border-blue/50">
               {avatarPreview
                 ? <img src={avatarPreview} className="w-full h-full object-cover" alt="" />
-                : <span className="font-display font-black text-blue text-3xl">{initials}</span>
-              }
+                : <span className="font-display font-black text-blue text-3xl">{initials}</span>}
             </div>
-            <div className="absolute bottom-0 right-0 w-8 h-8 bg-blue rounded-full flex items-center justify-center border-2 border-white shadow-md group-hover:scale-110 transition-transform">
+            <div className="absolute bottom-0 right-0 w-8 h-8 bg-blue rounded-full flex items-center justify-center border-2 border-bg shadow-md group-hover:scale-110 transition-transform">
               <IcCamera size={13} className="text-white" />
             </div>
           </div>
@@ -118,26 +158,54 @@ export default function EditProfile() {
           <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
         </div>
 
-        <form onSubmit={submit} className="card p-6 flex flex-col gap-4">
+        {/* Profile info */}
+        <form onSubmit={submitProfile} className="card p-6 flex flex-col gap-4">
+          <h2 className="font-display font-bold text-text text-sm">Personal info</h2>
+
           <div>
             <label className="block text-xs font-semibold text-text-muted mb-1.5">Full name</label>
-            <input className="input" value={form.fullName} onChange={e => set('fullName', e.target.value)} required />
+            <input className="input" value={form.fullName}
+              onChange={e => set('fullName', e.target.value)} required />
           </div>
+
           <div>
-            <p className="text-xs font-semibold text-text-muted mb-1.5">Email</p>
+            <label className="block text-xs font-semibold text-text-muted mb-1.5">Email</label>
             <div className="input bg-surface-2 text-text-muted cursor-not-allowed select-none">{user?.email}</div>
+            <p className="text-[11px] text-text-faint mt-1">Email cannot be changed</p>
           </div>
+
           <div>
             <label className="block text-xs font-semibold text-text-muted mb-1.5">
-              Phone <span className="font-normal text-text-faint">(optional)</span>
+              Bio <span className="font-normal text-text-faint">(optional · 160 chars)</span>
             </label>
-            <input className="input" type="tel" placeholder="+1 555 000 0000"
-              value={form.phone} onChange={e => set('phone', e.target.value)} />
+            <textarea className="input resize-none text-sm" rows={2} maxLength={160}
+              placeholder="A short line about yourself..."
+              value={form.bio} onChange={e => set('bio', e.target.value)} />
+            <p className="text-[11px] text-text-faint mt-1 text-right">{form.bio.length}/160</p>
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-text-muted mb-1.5">
+                Date of birth <span className="font-normal text-text-faint">(optional)</span>
+              </label>
+              <input className="input text-sm" type="date"
+                max={new Date(new Date().setFullYear(new Date().getFullYear() - 13)).toISOString().split('T')[0]}
+                value={form.dateOfBirth} onChange={e => set('dateOfBirth', e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-muted mb-1.5">
+                Phone <span className="font-normal text-text-faint">(optional)</span>
+              </label>
+              <input className="input text-sm" type="tel" placeholder="+1 555 000 0000"
+                value={form.phone} onChange={e => set('phone', e.target.value)} />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-semibold text-text-muted mb-1.5">City</label>
             <select className="input" value={form.cityId} onChange={e => set('cityId', e.target.value)}>
-              <option value="">Select city...</option>
+              <option value="">Select your city...</option>
               {Object.entries(countriesMap).map(([country, cs]) => (
                 <optgroup key={country} label={country}>
                   {cs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -145,10 +213,59 @@ export default function EditProfile() {
               ))}
             </select>
           </div>
-          <button type="submit" disabled={saving} className="btn-primary justify-center mt-2 disabled:opacity-40">
-            <IcSave size={15} /> {saving ? 'Saving...' : 'Save changes'}
+
+          <button type="submit" disabled={saving}
+            className={`btn-primary justify-center mt-1 disabled:opacity-40 transition-all ${saved ? 'bg-green-stamp border-green-stamp' : ''}`}>
+            {saved ? <><IcCheck size={15} /> Saved!</> : <><IcSave size={15} /> {saving ? 'Saving...' : 'Save changes'}</>}
           </button>
         </form>
+
+        {/* Password change */}
+        <form onSubmit={submitPassword} className="card p-6 flex flex-col gap-4">
+          <div>
+            <h2 className="font-display font-bold text-text text-sm">Change password</h2>
+            <p className="text-xs text-text-muted mt-0.5">Leave blank if you don't want to change it</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-text-muted mb-1.5">Current password</label>
+            <div className="relative">
+              <input className="input pr-16" type={showPw.current ? 'text' : 'password'}
+                placeholder="••••••••" value={pwForm.currentPassword}
+                onChange={e => setPw('currentPassword', e.target.value)} />
+              <PwToggle field="current" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-text-muted mb-1.5">New password</label>
+            <div className="relative">
+              <input className="input pr-16" type={showPw.new ? 'text' : 'password'}
+                placeholder="Min. 8 characters" value={pwForm.newPassword}
+                onChange={e => setPw('newPassword', e.target.value)} />
+              <PwToggle field="new" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-text-muted mb-1.5">Confirm new password</label>
+            <div className="relative">
+              <input className="input pr-16" type={showPw.confirm ? 'text' : 'password'}
+                placeholder="Repeat new password" value={pwForm.confirmPassword}
+                onChange={e => setPw('confirmPassword', e.target.value)} />
+              <PwToggle field="confirm" />
+              {pwForm.confirmPassword && pwForm.newPassword !== pwForm.confirmPassword && (
+                <p className="text-xs text-coral mt-1.5">Passwords don't match</p>
+              )}
+            </div>
+          </div>
+
+          <button type="submit" disabled={pwSaving || !pwForm.currentPassword || !pwForm.newPassword}
+            className="btn-secondary justify-center disabled:opacity-40">
+            {pwSaving ? 'Updating...' : 'Update password'}
+          </button>
+        </form>
+
       </div>
       <BottomNav />
     </div>

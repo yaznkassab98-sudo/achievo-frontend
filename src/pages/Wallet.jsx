@@ -98,12 +98,17 @@ export default function Wallet() {
             style={{ background: 'radial-gradient(circle, #2767FF 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
 
           <div className="relative flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 flex-shrink-0 overflow-hidden">
-              {user?.avatar_url
-                ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" />
-                : user?.full_name?.[0]?.toUpperCase()
-              }
-            </div>
+            <Link to="/profile/edit" className="relative group flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 overflow-hidden transition-all group-hover:border-white/40">
+                {user?.avatar_url
+                  ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" />
+                  : user?.full_name?.[0]?.toUpperCase()
+                }
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue rounded-full flex items-center justify-center border-2 border-bg opacity-0 group-hover:opacity-100 transition-opacity">
+                <IcPencil size={9} className="text-white" />
+              </div>
+            </Link>
             <div className="flex-1 min-w-0">
               <p className="font-display font-black text-text truncate" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
                 {user?.full_name}
