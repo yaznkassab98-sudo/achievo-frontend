@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard'
 import BusinessSetup from './pages/BusinessSetup'
 import StaffPin from './pages/StaffPin'
 import EditProfile from './pages/EditProfile'
+import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
@@ -39,6 +40,8 @@ export default function App() {
         <Route path="/browse" element={<Browse />} />
         <Route path="/b/:slug" element={<BusinessPage />} />
         <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/u/:id" element={<Profile />} />
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute role="business_owner"><Dashboard /></ProtectedRoute>} />
         <Route path="/setup" element={<ProtectedRoute role="business_owner"><BusinessSetup /></ProtectedRoute>} />

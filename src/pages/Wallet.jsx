@@ -113,7 +113,10 @@ export default function Wallet() {
               <p className="font-display font-black text-text truncate" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
                 {user?.full_name}
               </p>
-              <p className="text-text-muted text-xs truncate mt-0.5">{user?.email}</p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-text-muted text-xs truncate">{user?.email}</p>
+                <Link to="/profile" className="text-[11px] text-blue/70 hover:text-blue transition-colors flex-shrink-0">View profile →</Link>
+              </div>
             </div>
             <div className="text-right flex-shrink-0">
               <div className="flex items-center gap-1.5 justify-end">
