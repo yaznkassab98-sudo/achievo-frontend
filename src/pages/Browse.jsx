@@ -229,6 +229,8 @@ export default function Browse() {
   const [showScanner, setShowScanner] = useState(false)
   const [showCode, setShowCode] = useState(false)
   const [viewMode, setViewMode] = useState('grid')
+  const [sort, setSort] = useState('')
+  const [hasChallenge, setHasChallenge] = useState(false)
 
   const [userLocation, setUserLocation] = useState(null)
   const [flyTarget, setFlyTarget] = useState(null)
@@ -254,10 +256,12 @@ export default function Browse() {
     if (search) params.set('search', search)
     if (cat) params.set('category', cat)
     if (country) params.set('country', country)
+    if (sort) params.set('sort', sort)
+    if (hasChallenge) params.set('hasChallenge', '1')
     const url = city ? `/businesses/city/${city}?${params}` : `/businesses?${params}`
     api.get(url).then(r => { setBusinesses(r.data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [city, cat, search, country])
+  }, [city, cat, search, country, sort, hasChallenge])
 
   useEffect(() => {
     if (city && viewMode === 'map') {
@@ -514,7 +518,7 @@ export default function Browse() {
         </div>
 
         {/* CATEGORY PILLS */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-6 hide-scrollbar">
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-3 hide-scrollbar">
           {CATS.map(c => (
             <button key={c.value} onClick={() => setCat(c.value)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-display font-bold whitespace-nowrap transition-all flex-shrink-0
@@ -522,6 +526,24 @@ export default function Browse() {
               style={cat === c.value ? { backgroundColor: CAT_ACCENTS[c.value] || '#F5A623', borderColor: 'transparent' } : {}}>
               <c.icon size={13} className={cat === c.value ? 'text-bg' : ''} />
               {c.label}
+            </button>
+          ))}
+        </div>
+
+        {/* SORT + FILTER ROW */}
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <button
+            onClick={() => setHasChallenge(h => !h)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-display font-bold border transition-all flex-shrink-0
+              ${hasChallenge ? 'bg-amber/15 border-amber/40 text-amber' : 'bg-surface border-border text-text-muted hover:text-text'}`}>
+            <IcAward size={11} className={hasChallenge ? 'text-amber' : ''} />
+            Active challenges only
+          </button>
+          {[['', 'Most popular'], ['trending', '🔥 Trending'], ['newest', 'Newest']].map(([v, l]) => (
+            <button key={v} onClick={() => setSort(v)}
+              className={`px-3 py-1.5 rounded-full text-xs font-display font-bold border transition-all flex-shrink-0
+                ${sort === v ? 'bg-blue/15 border-blue/40 text-blue' : 'bg-surface border-border text-text-muted hover:text-text'}`}>
+              {l}
             </button>
           ))}
         </div>

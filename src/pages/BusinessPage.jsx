@@ -6,6 +6,7 @@ import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
 import BottomNav from '../components/BottomNav'
 import NotFound from './NotFound'
+import { getTier } from '../utils/tier'
 
 const DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 
@@ -413,6 +414,7 @@ export default function BusinessPage() {
                           <p className="text-xs font-bold text-center truncate w-full px-1 max-w-[80px]"
                             style={{ color: isMe ? '#7BA7FF' : 'rgba(255,255,255,0.8)' }}>
                             {e.full_name?.split(' ')[0]}
+                            <span className="ml-1">{getTier(e.total_points).emoji}</span>
                           </p>
                           <div className={`w-full ${podiumHeight} rounded-t-xl flex flex-col items-center justify-center gap-0.5`}
                             style={{ background: i === 0 ? 'rgba(245,166,35,0.2)' : i === 1 ? 'rgba(156,163,175,0.12)' : 'rgba(205,127,50,0.12)', border: `1px solid ${rankColors[i]}25` }}>
@@ -451,6 +453,7 @@ export default function BusinessPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold truncate" style={{ color: isMe ? '#7BA7FF' : 'rgba(255,255,255,0.75)' }}>
                           {entry.full_name}{isMe ? ' (you)' : ''}
+                          <span className="ml-1 text-xs opacity-70">{getTier(entry.total_points).emoji}</span>
                         </p>
                         <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
                           {entry.completions} challenge{entry.completions !== '1' ? 's' : ''}

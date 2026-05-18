@@ -4,6 +4,7 @@ import { IcArrowLeft, IcPencil, IcMapPin, IcAward, IcStar, IcGift, IcUsers } fro
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import BottomNav from '../components/BottomNav'
+import { getTier, getNextTier, getTierProgress } from '../utils/tier'
 
 const STAT_LABELS = [
   { key: 'total_points',        label: 'Points',      icon: IcStar,   color: 'text-amber'       },
@@ -59,6 +60,10 @@ export default function Profile() {
   const memberYear = new Date(profile.created_at).getFullYear()
   const earned = profile.achievements.filter(a => a.earned)
   const locked = profile.achievements.filter(a => !a.earned)
+  const pts = profile.total_points || 0
+  const tier = getTier(pts)
+  const next = getNextTier(pts)
+  const { pct, remaining } = getTierProgress(pts)
 
   return (
     <div className="min-h-screen pb-28">
@@ -96,8 +101,12 @@ export default function Profile() {
               }
             </div>
             <h1 className="font-display font-black text-text text-2xl tracking-tight">{profile.full_name}</h1>
+            <span className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-display font-black"
+              style={{ background: tier.bg, color: tier.color, border: `1px solid ${tier.border}` }}>
+              {tier.emoji} {tier.name}
+            </span>
             {profile.bio && (
-              <p className="text-text-muted text-sm mt-1.5 leading-relaxed max-w-xs">{profile.bio}</p>
+              <p className="text-text-muted text-sm mt-2 leading-relaxed max-w-xs">{profile.bio}</p>
             )}
             <div className="flex items-center gap-3 mt-3 flex-wrap justify-center">
               {profile.city_name && (
@@ -108,6 +117,17 @@ export default function Profile() {
               <span className="text-text-faint text-xs">·</span>
               <span className="text-xs text-text-muted">Member since {memberYear}</span>
             </div>
+            {next && (
+              <div className="mt-3 w-full max-w-xs">
+                <div className="flex justify-between text-[10px] text-text-faint mb-1">
+                  <span>{tier.emoji} {tier.name}</span>
+                  <span style={{ color: next.color }}>{next.emoji} {next.name} · {remaining} pts away</span>
+                </div>
+                <div className="h-1 rounded-full overflow-hidden bg-white/10">
+                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${tier.color}, ${next.color})` }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

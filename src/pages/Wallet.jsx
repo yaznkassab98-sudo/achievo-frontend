@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  IcAward, IcStar, IcLogOut, IcArrowRight, IcCheck, IcClock, IcGift, IcPencil, IcUsers, IcZap,
+  IcAward, IcStar, IcLogOut, IcArrowRight, IcCheck, IcClock, IcGift, IcPencil, IcUsers, IcZap, IcX,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
 import useToastStore from '../store/useToastStore'
 import BottomNav from '../components/BottomNav'
+import { getTier, getNextTier, getTierProgress } from '../utils/tier'
 
 const STATUS = {
   available: { label: 'Available', class: 'badge-green' },
@@ -32,6 +33,9 @@ export default function Wallet() {
   const [copied, setCopied] = useState(false)
   const [tab, setTab] = useState('rewards')
   const [loading, setLoading] = useState(true)
+  const [appealModal, setAppealModal] = useState(null)
+  const [appealNote, setAppealNote] = useState('')
+  const [appealSubmitting, setAppealSubmitting] = useState(false)
 
   const frontendUrl = window.location.origin
 
@@ -54,6 +58,22 @@ export default function Wallet() {
     navigator.clipboard.writeText(`${frontendUrl}/auth?ref=${referral.referral_code}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const submitAppeal = async () => {
+    if (!appealNote.trim() || !appealModal) return
+    setAppealSubmitting(true)
+    try {
+      await api.post(`/completions/${appealModal.id}/appeal`, { note: appealNote })
+      setCompletions(cs => cs.map(c => c.id === appealModal.id ? { ...c, appeal_status: 'pending' } : c))
+      toast('Appeal submitted! The business will review it.', 'success')
+      setAppealModal(null)
+      setAppealNote('')
+    } catch (err) {
+      toast(err.response?.data?.error || 'Failed to submit appeal', 'error')
+    } finally {
+      setAppealSubmitting(false)
+    }
   }
 
   const useReward = async (id) => {
@@ -99,37 +119,76 @@ export default function Wallet() {
           <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-20 pointer-events-none"
             style={{ background: 'radial-gradient(circle, #2767FF 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
 
-          <div className="relative flex items-center gap-4">
-            <Link to="/profile/edit" className="relative group flex-shrink-0">
-              <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 overflow-hidden transition-all group-hover:border-white/40">
-                {user?.avatar_url
-                  ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" />
-                  : user?.full_name?.[0]?.toUpperCase()
-                }
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue rounded-full flex items-center justify-center border-2 border-bg opacity-0 group-hover:opacity-100 transition-opacity">
-                <IcPencil size={9} className="text-white" />
-              </div>
-            </Link>
-            <div className="flex-1 min-w-0">
-              <p className="font-display font-black text-text truncate" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
-                {user?.full_name}
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-text-muted text-xs truncate">{user?.email}</p>
-                <Link to="/profile" className="text-[11px] text-blue/70 hover:text-blue transition-colors flex-shrink-0">View profile →</Link>
-              </div>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <div className="flex items-center gap-1.5 justify-end">
-                <IcStar size={14} className="text-amber" />
-                <span className="font-display font-black text-amber" style={{ fontSize: 'clamp(1.5rem,4vw,2rem)', letterSpacing: '-0.04em', lineHeight: 1 }}>
-                  {user?.total_points || 0}
-                </span>
-              </div>
-              <p className="text-text-muted text-[10px] mt-0.5 font-display uppercase tracking-wider">points</p>
-            </div>
-          </div>
+          {(() => {
+            const pts = user?.total_points || 0
+            const tier = getTier(pts)
+            const next = getNextTier(pts)
+            const { pct, remaining } = getTierProgress(pts)
+            return (
+              <>
+                <div className="relative flex items-center gap-4">
+                  <Link to="/profile/edit" className="relative group flex-shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-blue/20 flex items-center justify-center font-display font-black text-2xl text-white border border-white/20 overflow-hidden transition-all group-hover:border-white/40">
+                      {user?.avatar_url
+                        ? <img src={user.avatar_url} className="w-full h-full object-cover" alt="" />
+                        : user?.full_name?.[0]?.toUpperCase()
+                      }
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue rounded-full flex items-center justify-center border-2 border-bg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <IcPencil size={9} className="text-white" />
+                    </div>
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-display font-black text-text truncate" style={{ fontSize: '1.2rem', letterSpacing: '-0.02em' }}>
+                        {user?.full_name}
+                      </p>
+                      <span className="flex-shrink-0 text-sm px-2 py-0.5 rounded-full font-display font-black text-xs"
+                        style={{ background: tier.bg, color: tier.color, border: `1px solid ${tier.border}` }}>
+                        {tier.emoji} {tier.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <p className="text-text-muted text-xs truncate">{user?.email}</p>
+                      <Link to="/profile" className="text-[11px] text-blue/70 hover:text-blue transition-colors flex-shrink-0">View profile →</Link>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <IcStar size={14} className="text-amber" />
+                      <span className="font-display font-black text-amber" style={{ fontSize: 'clamp(1.5rem,4vw,2rem)', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                        {pts}
+                      </span>
+                    </div>
+                    <p className="text-text-muted text-[10px] mt-0.5 font-display uppercase tracking-wider">points</p>
+                  </div>
+                </div>
+
+                {next && (
+                  <div className="mt-4 pt-4 border-t border-white/8">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[11px] font-display font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        {tier.emoji} {tier.name}
+                      </span>
+                      <span className="text-[11px] font-display font-bold" style={{ color: next.color }}>
+                        {next.emoji} {next.name} in {remaining} pts
+                      </span>
+                    </div>
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${tier.color}, ${next.color})` }} />
+                    </div>
+                  </div>
+                )}
+                {!next && (
+                  <div className="mt-4 pt-4 border-t border-white/8 flex items-center gap-2">
+                    <span style={{ color: tier.color }}>💎</span>
+                    <span className="text-xs font-display font-black" style={{ color: tier.color }}>Platinum — Maximum tier achieved!</span>
+                  </div>
+                )}
+              </>
+            )
+          })()}
 
           <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-white/8 relative">
             {[
@@ -325,33 +384,49 @@ export default function Wallet() {
               const isConfirmed = c.status === 'confirmed' || c.status === 'claimed'
               const isPending = c.status === 'pending'
               return (
-                <div key={c.id} className="bg-white border border-border rounded-2xl px-4 py-3.5 flex items-center gap-3 hover:border-border-2 transition-colors"
+                <div key={c.id} className="bg-white border border-border rounded-2xl overflow-hidden transition-colors"
                   style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.05)' }}>
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    isConfirmed ? 'bg-green-stamp/10' : isPending ? 'bg-amber/10' : 'bg-coral/10'}`}>
-                    {isConfirmed
-                      ? <IcCheck size={15} className="text-green-stamp" />
-                      : isPending
-                        ? <IcClock size={15} className="text-amber" />
-                        : <IcAward size={15} className="text-coral" />
-                    }
+                  <div className="px-4 py-3.5 flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      isConfirmed ? 'bg-green-stamp/10' : isPending ? 'bg-amber/10' : 'bg-coral/10'}`}>
+                      {isConfirmed
+                        ? <IcCheck size={15} className="text-green-stamp" />
+                        : isPending
+                          ? <IcClock size={15} className="text-amber" />
+                          : <IcAward size={15} className="text-coral" />
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-text truncate">{c.challenge_title}</p>
+                      <p className="text-xs text-text-muted truncate">{c.business_name}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      {c.points_value > 0 && isConfirmed && (
+                        <p className="font-display font-black text-green-stamp text-sm tabular-nums">+{c.points_value} pts</p>
+                      )}
+                      {c.points_value > 0 && isPending && (
+                        <p className="font-display font-black text-amber text-sm tabular-nums opacity-60">+{c.points_value} pts</p>
+                      )}
+                      <p className={`text-[10px] font-display font-bold capitalize mt-0.5 ${
+                        isConfirmed ? 'text-green-stamp' : isPending ? 'text-amber' : 'text-coral'}`}>
+                        {c.status}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-text truncate">{c.challenge_title}</p>
-                    <p className="text-xs text-text-muted truncate">{c.business_name}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    {c.points_value > 0 && isConfirmed && (
-                      <p className="font-display font-black text-green-stamp text-sm tabular-nums">+{c.points_value} pts</p>
-                    )}
-                    {c.points_value > 0 && isPending && (
-                      <p className="font-display font-black text-amber text-sm tabular-nums opacity-60">+{c.points_value} pts</p>
-                    )}
-                    <p className={`text-[10px] font-display font-bold capitalize mt-0.5 ${
-                      isConfirmed ? 'text-green-stamp' : isPending ? 'text-amber' : 'text-coral'}`}>
-                      {c.status}
-                    </p>
-                  </div>
+                  {c.status === 'rejected' && !c.appeal_status && (
+                    <div className="px-4 py-2.5 border-t border-coral/10 bg-coral/[0.03] flex items-center justify-between gap-3">
+                      <p className="text-xs text-text-muted">Think this was a mistake?</p>
+                      <button onClick={() => { setAppealModal(c); setAppealNote('') }}
+                        className="text-xs font-display font-bold text-coral hover:underline flex-shrink-0">
+                        Appeal →
+                      </button>
+                    </div>
+                  )}
+                  {c.appeal_status === 'pending' && (
+                    <div className="px-4 py-2.5 border-t border-amber/10 bg-amber/[0.03]">
+                      <p className="text-xs text-amber font-display font-bold">Appeal under review</p>
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -359,6 +434,44 @@ export default function Wallet() {
         )}
       </div>
       <BottomNav />
+
+      {/* APPEAL MODAL */}
+      {appealModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={e => e.target === e.currentTarget && setAppealModal(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <p className="font-display font-black text-text text-lg">Appeal rejection</p>
+                <p className="text-text-muted text-sm mt-0.5 truncate max-w-xs">{appealModal.challenge_title}</p>
+              </div>
+              <button onClick={() => setAppealModal(null)} className="p-2 text-text-muted hover:text-text rounded-xl hover:bg-surface-2 transition-colors flex-shrink-0">
+                <IcX size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-text-muted mb-3">Explain why you think the rejection was a mistake. The business will review your appeal.</p>
+            <textarea
+              value={appealNote}
+              onChange={e => setAppealNote(e.target.value)}
+              placeholder="Describe what happened and why your submission should be approved..."
+              className="w-full rounded-xl border border-border p-3 text-sm text-text bg-surface resize-none focus:outline-none focus:border-blue/50 transition-colors"
+              rows={4}
+              maxLength={500}
+            />
+            <p className="text-[11px] text-text-faint text-right mb-4">{appealNote.length}/500</p>
+            <div className="flex gap-3">
+              <button onClick={() => setAppealModal(null)} className="btn-secondary flex-1 justify-center py-3">
+                Cancel
+              </button>
+              <button onClick={submitAppeal} disabled={!appealNote.trim() || appealSubmitting}
+                className="btn-primary flex-1 justify-center py-3 disabled:opacity-40">
+                {appealSubmitting ? 'Submitting...' : 'Submit appeal'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
