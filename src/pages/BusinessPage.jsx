@@ -128,11 +128,14 @@ function ChallengeTicket({ challenge, status }) {
 
 export default function BusinessPage() {
   const { slug } = useParams()
+  const navigate = useNavigate()
   const { user } = useAuthStore()
   const [biz, setBiz] = useState(null)
   const [loading, setLoading] = useState(true)
   const [progressMap, setProgressMap] = useState({})
   const [leaderboard, setLeaderboard] = useState([])
+  const [following, setFollowing] = useState(false)
+  const [followLoading, setFollowLoading] = useState(false)
 
   useEffect(() => {
     api.get(`/businesses/slug/${slug}`).then(r => {
@@ -140,6 +143,14 @@ export default function BusinessPage() {
       api.get(`/businesses/${r.data.id}/leaderboard`).then(lb => setLeaderboard(lb.data)).catch(() => {})
     }).catch(() => setLoading(false))
   }, [slug])
+
+  useEffect(() => {
+    if (user && biz?.id) {
+      api.get(`/follows/${biz.id}/check`)
+        .then(r => setFollowing(r.data.following))
+        .catch(() => {})
+    }
+  }, [user, biz?.id])
 
   useEffect(() => {
     if (user && biz?.id) {
@@ -175,6 +186,24 @@ export default function BusinessPage() {
   const completed = biz.challenges?.filter(c => ['confirmed','claimed'].includes(progressMap[c.id])).length || 0
   const total = biz.challenges?.length || 0
 
+  const toggleFollow = async () => {
+    if (!user) { navigate('/auth'); return }
+    setFollowLoading(true)
+    try {
+      if (following) {
+        await api.delete(`/follows/${biz.id}`)
+        setFollowing(false)
+      } else {
+        await api.post('/follows', { businessId: biz.id })
+        setFollowing(true)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setFollowLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen">
       {/* COVER */}
@@ -207,7 +236,7 @@ export default function BusinessPage() {
             style={{ background: 'linear-gradient(135deg, #1F2340, #111320)' }}>
             {biz.logo_url ? <img src={biz.logo_url} className="w-full h-full object-cover" alt="" /> : (biz.name?.[0] || '?')}
           </div>
-          <div className="pb-1 flex-1">
+          <div className="pb-1 flex-1 min-w-0">
             <h1 className="font-display font-black text-text" style={{ fontSize: 'clamp(1.5rem,4vw,2rem)', letterSpacing: '-0.03em', lineHeight: 1 }}>
               {biz.name}
             </h1>
@@ -217,6 +246,12 @@ export default function BusinessPage() {
             }
             {biz.tagline && <p className="text-text-faint text-xs mt-0.5 capitalize">{biz.category} · {biz.city_name}</p>}
           </div>
+          {user && (
+            <button onClick={toggleFollow} disabled={followLoading}
+              className={`btn-secondary text-sm px-4 py-2 flex-shrink-0 disabled:opacity-40 ${following ? 'border-blue/40 text-blue' : ''}`}>
+              {followLoading ? '...' : following ? '✓ Following' : 'Follow'}
+            </button>
+          )}
         </div>
 
         {(parseInt(biz.weekly_completions) > 0 || parseInt(biz.total_completions) > 0) && (

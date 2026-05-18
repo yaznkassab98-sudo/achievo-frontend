@@ -28,6 +28,7 @@ export default function Wallet() {
   const [completions, setCompletions] = useState([])
   const [achievements, setAchievements] = useState([])
   const [referral, setReferral] = useState(null)
+  const [follows, setFollows] = useState([])
   const [copied, setCopied] = useState(false)
   const [tab, setTab] = useState('rewards')
   const [loading, setLoading] = useState(true)
@@ -41,9 +42,10 @@ export default function Wallet() {
       api.get('/completions/mine'),
       api.get('/completions/achievements'),
       api.get('/referrals/mine'),
-    ]).then(([r, c, a, ref]) => {
+      api.get('/follows/mine'),
+    ]).then(([r, c, a, ref, f]) => {
       setRewards(r.data); setCompletions(c.data); setAchievements(a.data)
-      setReferral(ref.data); setLoading(false)
+      setReferral(ref.data); setFollows(f.data); setLoading(false)
     })
   }, [])
 
@@ -211,8 +213,8 @@ export default function Wallet() {
         )}
 
         {/* TABS */}
-        <div className="flex gap-1 bg-surface border border-border p-1 rounded-xl mb-6">
-          {[['rewards', 'My rewards'], ['history', 'History']].map(([t, l]) => (
+        <div className="flex gap-1 bg-surface border border-border p-1 rounded-xl mb-6 overflow-x-auto">
+          {[['rewards', 'My rewards'], ['following', 'Following'], ['history', 'History']].map(([t, l]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-1 py-2.5 rounded-lg text-sm font-display font-bold transition-all
                 ${tab === t ? 'bg-white text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
@@ -277,6 +279,40 @@ export default function Wallet() {
                 </div>
               )
             })}
+          </div>
+        ) : tab === 'following' ? (
+          <div className="flex flex-col gap-3">
+            {follows.length === 0 ? (
+              <div className="card p-14 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-4">
+                  <IcUsers size={24} className="text-text-faint" />
+                </div>
+                <p className="font-display font-bold text-text mb-1">Not following any businesses</p>
+                <p className="text-text-muted text-sm mb-5">Follow businesses to track their challenges</p>
+                <Link to="/browse" className="btn-primary text-sm px-5 py-2.5 inline-flex">
+                  Explore businesses <IcArrowRight size={14} />
+                </Link>
+              </div>
+            ) : follows.map(b => (
+              <Link key={b.id} to={`/b/${b.slug}`}
+                className="card p-4 flex items-center gap-4 hover:border-border/80 transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-surface-2 flex items-center justify-center flex-shrink-0 overflow-hidden font-display font-black text-text-muted text-sm"
+                  style={{ background: 'linear-gradient(135deg, #1F2340, #111320)' }}>
+                  {b.logo_url
+                    ? <img src={b.logo_url} className="w-full h-full object-cover" alt="" />
+                    : b.name?.[0]
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-text group-hover:text-blue transition-colors truncate">{b.name}</p>
+                  <p className="text-xs text-text-muted truncate capitalize">{b.category} · {b.city_name}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <span className="badge-blue text-xs">{b.challenge_count}</span>
+                  <p className="text-[10px] text-text-faint mt-1">challenges</p>
+                </div>
+              </Link>
+            ))}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
