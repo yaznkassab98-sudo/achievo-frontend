@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   IcAward, IcBarChart, IcUsers, IcQr, IcPlus, IcPencil, IcTrash,
   IcLogOut, IcBell, IcCheck, IcX, IcCopy, IcChevronDown, IcChevronUp,
-  IcCamera, IcSave, IcStar, IcClock, IcHash, IcInstagram,
+  IcCamera, IcSave, IcStar, IcClock, IcHash, IcInstagram, IcZap,
 } from '../components/Icons'
 import api from '../api/client'
 import useAuthStore from '../store/useAuthStore'
@@ -387,6 +387,7 @@ export default function Dashboard() {
   const [challenges, setChallenges] = useState([])
   const [staff, setStaff] = useState([])
   const [pending, setPending] = useState([])
+  const [flagged, setFlagged] = useState([])
   const [qrShared, setQrShared] = useState(false)
   const [checklistDismissed, setChecklistDismissed] = useState(false)
   const [showForm, setShowForm] = useState(false)
@@ -497,9 +498,10 @@ export default function Dashboard() {
         api.get(`/challenges/business/${r.data.id}`),
         api.get(`/staff/${r.data.id}`),
         api.get(`/completions/pending/${r.data.id}`),
+        api.get(`/completions/flagged/${r.data.id}`).catch(() => ({ data: [] })),
       ])
-    }).then(([ch, st, pe]) => {
-      setChallenges(ch.data); setStaff(st.data); setPending(pe.data); setLoading(false)
+    }).then(([ch, st, pe, fg]) => {
+      setChallenges(ch.data); setStaff(st.data); setPending(pe.data); setFlagged(fg.data); setLoading(false)
       if (bizData) {
         setQrShared(localStorage.getItem(`achievo_qr_shared_${bizData.id}`) === 'true')
         setChecklistDismissed(localStorage.getItem(`achievo_onboarding_dismissed_${bizData.id}`) === 'true')
@@ -741,6 +743,38 @@ export default function Dashboard() {
                 <div className="h-16 bg-surface-2 rounded-lg animate-pulse" />
               )}
             </div>
+
+            {/* Flagged completions — PRIORITY */}
+            {flagged.length > 0 && (
+              <div className="rounded-2xl p-5 border-2 border-coral bg-coral/5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-coral/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <IcZap size={14} className="text-coral" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-display font-bold text-coral text-sm">Flagged for review</p>
+                    <p className="text-text-muted text-xs mt-1">{flagged.length} submission{flagged.length === 1 ? '' : 's'} detected as potential spam</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {flagged.slice(0, 5).map((p) => (
+                    <div key={p.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/50 border border-coral/20">
+                      <div className="w-8 h-8 rounded-lg bg-coral/10 flex items-center justify-center font-display font-black text-coral text-xs flex-shrink-0">
+                        {p.full_name?.[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-text truncate">{p.full_name}</p>
+                        <p className="text-[11px] text-text-muted truncate">{p.challenge_title}</p>
+                      </div>
+                      <span className="badge text-[10px] bg-coral/15 text-coral border-coral/30 flex-shrink-0">Rapid</span>
+                    </div>
+                  ))}
+                </div>
+                {flagged.length > 5 && (
+                  <p className="text-text-muted text-xs mt-2">+{flagged.length - 5} more</p>
+                )}
+              </div>
+            )}
 
             {/* Pending confirmations */}
             {pending.length > 0 && (
