@@ -37,8 +37,8 @@ function PwStrengthBar({ password }) {
   })()
   if (!password) return null
   const labels = ['Weak', 'Fair', 'Strong']
-  const colors = ['bg-coral', 'bg-amber', 'bg-green-stamp']
-  const textColors = ['text-coral', 'text-amber', 'text-green-stamp']
+  const colors = ['bg-coral', 'bg-amber', 'bg-green']
+  const textColors = ['text-coral', 'text-amber', 'text-green']
   return (
     <div className="mt-2">
       <div className="flex gap-1 mb-1">
@@ -552,7 +552,7 @@ export default function Auth() {
                         value={digit}
                         onChange={e => handleOtpInput(i, e.target.value)}
                         onKeyDown={e => handleOtpKeyDown(i, e)}
-                        className="w-12 h-14 text-center text-xl font-display font-black text-text bg-white border-2 rounded-xl transition-all focus:outline-none focus:border-blue"
+                        className="w-12 h-14 text-center text-xl font-display font-black text-text bg-surface border-2 border-border rounded-xl transition-all focus:outline-none focus:border-blue"
                         style={{
                           borderColor: digit ? '#2767FF' : undefined,
                           boxShadow: digit ? '0 0 0 3px rgba(39,103,255,0.12)' : undefined,
@@ -703,10 +703,10 @@ export default function Auth() {
                       return (
                         <div key={l} className="flex items-center gap-1">
                           <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black transition-all
-                            ${done ? 'bg-green-stamp text-white' : active ? 'bg-blue text-white' : 'bg-surface-2 text-text-faint border border-border'}`}>
+                            ${done ? 'bg-green text-white' : active ? 'bg-blue text-white' : 'bg-surface-2 text-text-faint border border-border'}`}>
                             {done ? <IcCheck size={10} /> : n}
                           </div>
-                          {n < 3 && <div className={`w-4 h-px ${step > n ? 'bg-green-stamp/50' : 'bg-border'}`} />}
+                          {n < 3 && <div className={`w-4 h-px ${step > n ? 'bg-green/50' : 'bg-border'}`} />}
                         </div>
                       )
                     })}
@@ -844,7 +844,7 @@ export default function Auth() {
                         value={digit}
                         onChange={e => handleOtpInput(i, e.target.value)}
                         onKeyDown={e => handleOtpKeyDown(i, e)}
-                        className="w-12 h-14 text-center text-xl font-display font-black text-text bg-white border-2 rounded-xl transition-all focus:outline-none focus:border-blue"
+                        className="w-12 h-14 text-center text-xl font-display font-black text-text bg-surface border-2 border-border rounded-xl transition-all focus:outline-none focus:border-blue"
                         style={{
                           borderColor: digit ? '#2767FF' : undefined,
                           boxShadow: digit ? '0 0 0 3px rgba(39,103,255,0.12)' : undefined,

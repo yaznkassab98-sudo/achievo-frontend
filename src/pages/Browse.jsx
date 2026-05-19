@@ -479,7 +479,7 @@ export default function Browse() {
                   {country && <button onClick={e => { e.stopPropagation(); setCountry('') }} className="ml-0.5 hover:text-coral"><IcX size={10} /></button>}
                 </button>
                 {showCountryPicker && (
-                  <div className="absolute top-full left-0 mt-1.5 bg-white border border-border rounded-2xl shadow-lg z-30 min-w-[160px] py-1 overflow-hidden">
+                  <div className="absolute top-full left-0 mt-1.5 bg-surface border border-border rounded-2xl shadow-lg z-30 min-w-[160px] py-1 overflow-hidden">
                     <button onClick={() => { setCountry(''); setShowCountryPicker(false) }}
                       className={`w-full text-left px-3 py-2 text-sm hover:bg-surface-2 transition-colors ${!country ? 'text-blue font-bold' : 'text-text'}`}>
                       All countries
@@ -505,7 +505,7 @@ export default function Browse() {
             <div className="flex bg-surface border border-border rounded-xl p-0.5">
               {[['grid', 'Grid'], ['map', 'Map'], ['nearby', '📍 Nearby']].map(([v, l]) => (
                 <button key={v} onClick={() => { setViewMode(v); if (v === 'nearby' && !userLocation) locateMe() }}
-                  className={`px-3 py-1.5 rounded-[10px] text-xs font-display font-bold transition-all ${viewMode === v ? 'bg-white text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
+                  className={`px-3 py-1.5 rounded-[10px] text-xs font-display font-bold transition-all ${viewMode === v ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
                   {l}
                 </button>
               ))}
@@ -575,7 +575,7 @@ export default function Browse() {
                 {(userLocation ? bizWithDistance : businesses).map(b => {
                   const accent = CAT_ACCENTS[b.category] || '#2767FF'
                   return (
-                    <Link key={b.id} to={`/b/${b.slug}`} className="group block rounded-2xl bg-white border border-border overflow-hidden transition-all duration-300"
+                    <Link key={b.id} to={`/b/${b.slug}`} className="group block rounded-2xl bg-surface border border-border overflow-hidden transition-all duration-300"
                       style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.06)' }}
                       onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = `0 16px 48px ${accent}1E, 0 4px 12px rgba(17,24,39,0.08)`; e.currentTarget.style.borderColor = `${accent}30` }}
                       onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 3px rgba(17,24,39,0.06)'; e.currentTarget.style.borderColor = '' }}>
@@ -629,8 +629,8 @@ export default function Browse() {
                         </div>
                         {parseInt(b.weekly_completions) > 0 && (
                           <div className="flex items-center gap-1.5 mt-2">
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-stamp">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-stamp animate-pulse inline-block" />
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse inline-block" />
                               {b.weekly_completions} {parseInt(b.weekly_completions) === 1 ? 'person' : 'people'} completed challenges this week
                             </span>
                           </div>
@@ -650,7 +650,7 @@ export default function Browse() {
           <div className="flex gap-4 -mx-4 px-0" style={{ height: 'calc(100dvh - 16rem)' }}>
 
             {/* SIDEBAR — desktop */}
-            <div className="hidden md:flex flex-col w-80 flex-shrink-0 border border-border rounded-2xl overflow-hidden bg-white">
+            <div className="hidden md:flex flex-col w-80 flex-shrink-0 border border-border rounded-2xl overflow-hidden bg-surface">
               {/* Geo search */}
               <form onSubmit={handleGeoSearch} className="p-3 border-b border-border flex gap-2">
                 <div className="relative flex-1">
@@ -713,7 +713,7 @@ export default function Browse() {
 
               {/* Near me FAB */}
               <button onClick={locateMe}
-                className="absolute bottom-16 md:bottom-4 right-3 z-20 w-11 h-11 rounded-full bg-white border border-border shadow-lg flex items-center justify-center text-blue hover:shadow-xl transition-shadow active:scale-95"
+                className="absolute bottom-16 md:bottom-4 right-3 z-20 w-11 h-11 rounded-full bg-surface border border-border shadow-lg flex items-center justify-center text-blue hover:shadow-xl transition-shadow active:scale-95"
                 title="Center on my location">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
@@ -895,7 +895,7 @@ export default function Browse() {
                         : `${b.distance.toFixed(1)}km`
                       return (
                         <Link key={b.id} to={`/b/${b.slug}`}
-                          className="group flex items-center gap-4 bg-white border border-border rounded-2xl px-4 py-4 transition-all hover:border-blue/20 hover:shadow-md"
+                          className="group flex items-center gap-4 bg-surface border border-border rounded-2xl px-4 py-4 transition-all hover:border-blue/20 hover:shadow-md"
                           style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.05)' }}>
 
                           {/* Rank */}
@@ -929,8 +929,8 @@ export default function Browse() {
                             )}
                             {parseInt(b.weekly_completions) > 0 && (
                               <div className="flex items-center gap-1.5 mt-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-stamp animate-pulse flex-shrink-0" />
-                                <span className="text-[11px] font-semibold text-green-stamp">{b.weekly_completions} this week</span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse flex-shrink-0" />
+                                <span className="text-[11px] font-semibold text-green">{b.weekly_completions} this week</span>
                               </div>
                             )}
                           </div>
@@ -967,7 +967,7 @@ export default function Browse() {
 
         {/* MOBILE BUSINESS LIST — shown below map on mobile */}
         {viewMode === 'map' && (
-          <div className="md:hidden mt-4 border border-border rounded-2xl overflow-hidden bg-white">
+          <div className="md:hidden mt-4 border border-border rounded-2xl overflow-hidden bg-surface">
             <div className="px-4 py-2.5 border-b border-border bg-surface/50 flex items-center justify-between">
               <p className="text-xs text-text-muted font-semibold">
                 {loading ? 'Loading...' : `${sidebarBizs.length} businesses${userLocation ? ' · nearest first' : ''}`}

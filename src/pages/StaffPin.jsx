@@ -145,8 +145,8 @@ export default function StaffPin() {
         <span className="text-text-muted text-sm truncate">{bizName}</span>
       </nav>
       <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6 relative z-10">
-        <div className="w-20 h-20 rounded-full bg-green-stamp/15 border-2 border-green-stamp/30 flex items-center justify-center animate-stamp">
-          <IcCheck size={36} className="text-green-stamp" />
+        <div className="w-20 h-20 rounded-full bg-green/15 border-2 border-green/30 flex items-center justify-center animate-stamp">
+          <IcCheck size={36} className="text-green" />
         </div>
         <div className="text-center">
           <h1 className="font-display font-black text-text mb-2" style={{ fontSize: 'clamp(1.75rem,5vw,2.5rem)', letterSpacing: '-0.03em' }}>
@@ -207,11 +207,11 @@ export default function StaffPin() {
             {t}
             {count > 0 && (
               <span className={`ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-black
-                ${tab === t ? 'bg-green-stamp text-white' : 'bg-surface-2 text-text-muted border border-border'}`}>
+                ${tab === t ? 'bg-green text-white' : 'bg-surface-2 text-text-muted border border-border'}`}>
                 {count}
               </span>
             )}
-            {tab === t && <div className="absolute bottom-0 inset-x-0 h-0.5 bg-green-stamp" />}
+            {tab === t && <div className="absolute bottom-0 inset-x-0 h-0.5 bg-green" />}
           </button>
         ))}
       </div>
@@ -220,8 +220,8 @@ export default function StaffPin() {
         {tab === 'pending' ? (
           pending.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-green-stamp/10 flex items-center justify-center mx-auto mb-4">
-                <IcCheck size={24} className="text-green-stamp" />
+              <div className="w-14 h-14 rounded-2xl bg-green/10 flex items-center justify-center mx-auto mb-4">
+                <IcCheck size={24} className="text-green" />
               </div>
               <p className="font-display font-bold text-text mb-1">All clear!</p>
               <p className="text-text-muted text-sm">No pending confirmations</p>
@@ -260,18 +260,18 @@ export default function StaffPin() {
             <div className="flex flex-col divide-y divide-border">
               {approved.map(a => (
                 <div key={a.id} className="flex items-center gap-4 px-4 py-4">
-                  <div className="w-12 h-12 rounded-full bg-green-stamp/10 flex items-center justify-center font-display font-black text-green-stamp text-lg flex-shrink-0 border border-green-stamp/20">
+                  <div className="w-12 h-12 rounded-full bg-green/10 flex items-center justify-center font-display font-black text-green text-lg flex-shrink-0 border border-green/20">
                     {a.full_name?.[0]?.toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
                       <p className="font-display font-bold text-text text-sm truncate">{a.full_name}</p>
-                      <span className="text-[10px] font-black text-green-stamp bg-green-stamp/10 px-1.5 py-0.5 rounded font-display tracking-wide flex-shrink-0">APPROVED</span>
+                      <span className="text-[10px] font-black text-green bg-green/10 px-1.5 py-0.5 rounded font-display tracking-wide flex-shrink-0">APPROVED</span>
                     </div>
                     <p className="text-text-muted text-xs truncate">{a.challenge_title}</p>
                     <p className="text-amber text-xs font-semibold truncate mt-0.5">{a.reward_title}</p>
                   </div>
-                  <IcCheck size={18} className="text-green-stamp flex-shrink-0" />
+                  <IcCheck size={18} className="text-green flex-shrink-0" />
                 </div>
               ))}
             </div>
@@ -295,7 +295,7 @@ export default function StaffPin() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm px-4 pb-0 sm:pb-6"
           style={{ background: 'rgba(10,27,51,0.5)' }}
           onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setPin('') } }}>
-          <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-sm overflow-hidden"
+          <div className="bg-surface rounded-t-3xl sm:rounded-3xl w-full max-w-sm overflow-hidden"
             style={{ boxShadow: '0 -8px 48px rgba(0,0,0,0.18)' }}>
 
             <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border">
@@ -309,8 +309,8 @@ export default function StaffPin() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3 px-5 py-3 bg-green-stamp/5 border-b border-green-stamp/15">
-              <div className="w-9 h-9 rounded-full bg-green-stamp/15 flex items-center justify-center font-display font-black text-green-stamp flex-shrink-0">
+            <div className="flex items-center gap-3 px-5 py-3 bg-green/5 border-b border-green/15">
+              <div className="w-9 h-9 rounded-full bg-green/15 flex items-center justify-center font-display font-black text-green flex-shrink-0">
                 {selected.full_name?.[0]?.toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
@@ -326,8 +326,8 @@ export default function StaffPin() {
               <div className={`flex gap-3 justify-center ${shake ? 'animate-[shake_0.4s_ease]' : ''}`}>
                 {Array(6).fill(0).map((_, i) => (
                   <div key={i} className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all duration-150
-                    ${i < pin.length ? 'border-green-stamp bg-green-stamp/15' : 'border-border bg-surface-2'}`}>
-                    {i < pin.length && <div className="w-2.5 h-2.5 rounded-full bg-green-stamp" />}
+                    ${i < pin.length ? 'border-green bg-green/15' : 'border-border bg-surface-2'}`}>
+                    {i < pin.length && <div className="w-2.5 h-2.5 rounded-full bg-green" />}
                   </div>
                 ))}
               </div>

@@ -3,7 +3,7 @@ import { IcCheck, IcX, IcAlert, IcInfo } from './Icons'
 import useToastStore from '../store/useToastStore'
 
 const CONFIGS = {
-  success: { Icon: IcCheck, bg: 'bg-green-stamp/10 border-green-stamp/30', text: 'text-green-stamp', dot: 'bg-green-stamp' },
+  success: { Icon: IcCheck, bg: 'bg-green/10 border-green/30', text: 'text-green', dot: 'bg-green' },
   error:   { Icon: IcAlert, bg: 'bg-coral/10 border-coral/30',             text: 'text-coral',       dot: 'bg-coral'       },
   info:    { Icon: IcInfo,  bg: 'bg-amber/10 border-amber/30',             text: 'text-amber',       dot: 'bg-amber'       },
 }
@@ -17,7 +17,7 @@ function ToastItem({ toast }) {
   useEffect(() => { requestAnimationFrame(() => setVisible(true)) }, [])
 
   return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-xl
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl shadow-xl bg-surface
       transition-all duration-300 ${cfg.bg} ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
       <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${cfg.dot}/20`}>
         <Icon size={13} className={cfg.text} />

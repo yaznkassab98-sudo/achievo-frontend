@@ -215,7 +215,7 @@ export default function EditProfile() {
           </div>
 
           <button type="submit" disabled={saving}
-            className={`btn-primary justify-center mt-1 disabled:opacity-40 transition-all ${saved ? 'bg-green-stamp border-green-stamp' : ''}`}>
+            className={`btn-primary justify-center mt-1 disabled:opacity-40 transition-all ${saved ? 'bg-green border-green' : ''}`}>
             {saved ? <><IcCheck size={15} /> Saved!</> : <><IcSave size={15} /> {saving ? 'Saving...' : 'Save changes'}</>}
           </button>
         </form>

@@ -16,8 +16,8 @@ const STATUS = {
 }
 
 const STATUS_DOT = {
-  confirmed: 'bg-green-stamp',
-  claimed:   'bg-green-stamp',
+  confirmed: 'bg-green',
+  claimed:   'bg-green',
   pending:   'bg-amber',
   rejected:  'bg-coral',
 }
@@ -213,7 +213,7 @@ export default function Wallet() {
             <div className="flex flex-wrap gap-2">
               {achievements.map(a => (
                 <div key={a.type} title={a.desc}
-                  className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-white transition-all hover:shadow-md cursor-default"
+                  className="flex items-center gap-2 px-3 py-2 rounded-2xl border border-border bg-surface transition-all hover:shadow-md cursor-default"
                   style={{ boxShadow: `0 1px 4px ${a.color}18` }}>
                   <span style={{ fontSize: 18, lineHeight: 1 }}>{a.emoji}</span>
                   <div>
@@ -276,7 +276,7 @@ export default function Wallet() {
           {[['rewards', 'My rewards'], ['following', 'Following'], ['history', 'History']].map(([t, l]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`flex-1 py-2.5 rounded-lg text-sm font-display font-bold transition-all
-                ${tab === t ? 'bg-white text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
+                ${tab === t ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
               {l}
             </button>
           ))}
@@ -320,9 +320,9 @@ export default function Wallet() {
                           Claim
                         </button>
                       ) : (
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.status === 'used' ? 'bg-green-stamp/12' : 'bg-surface-2'}`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${r.status === 'used' ? 'bg-green/12' : 'bg-surface-2'}`}>
                           {r.status === 'used'
-                            ? <IcCheck size={14} className="text-green-stamp" />
+                            ? <IcCheck size={14} className="text-green" />
                             : <IcClock size={14} className="text-text-faint" />
                           }
                         </div>
@@ -384,13 +384,13 @@ export default function Wallet() {
               const isConfirmed = c.status === 'confirmed' || c.status === 'claimed'
               const isPending = c.status === 'pending'
               return (
-                <div key={c.id} className="bg-white border border-border rounded-2xl overflow-hidden transition-colors"
+                <div key={c.id} className="bg-surface border border-border rounded-2xl overflow-hidden transition-colors"
                   style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.05)' }}>
                   <div className="px-4 py-3.5 flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      isConfirmed ? 'bg-green-stamp/10' : isPending ? 'bg-amber/10' : 'bg-coral/10'}`}>
+                      isConfirmed ? 'bg-green/10' : isPending ? 'bg-amber/10' : 'bg-coral/10'}`}>
                       {isConfirmed
-                        ? <IcCheck size={15} className="text-green-stamp" />
+                        ? <IcCheck size={15} className="text-green" />
                         : isPending
                           ? <IcClock size={15} className="text-amber" />
                           : <IcAward size={15} className="text-coral" />
@@ -402,13 +402,13 @@ export default function Wallet() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       {c.points_value > 0 && isConfirmed && (
-                        <p className="font-display font-black text-green-stamp text-sm tabular-nums">+{c.points_value} pts</p>
+                        <p className="font-display font-black text-green text-sm tabular-nums">+{c.points_value} pts</p>
                       )}
                       {c.points_value > 0 && isPending && (
                         <p className="font-display font-black text-amber text-sm tabular-nums opacity-60">+{c.points_value} pts</p>
                       )}
                       <p className={`text-[10px] font-display font-bold capitalize mt-0.5 ${
-                        isConfirmed ? 'text-green-stamp' : isPending ? 'text-amber' : 'text-coral'}`}>
+                        isConfirmed ? 'text-green' : isPending ? 'text-amber' : 'text-coral'}`}>
                         {c.status}
                       </p>
                     </div>
@@ -440,7 +440,7 @@ export default function Wallet() {
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
           onClick={e => e.target === e.currentTarget && setAppealModal(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl">
+          <div className="bg-surface rounded-3xl w-full max-w-md p-6 shadow-2xl">
             <div className="flex items-start justify-between mb-5">
               <div>
                 <p className="font-display font-black text-text text-lg">Appeal rejection</p>

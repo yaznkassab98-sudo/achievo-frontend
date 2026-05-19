@@ -10,7 +10,7 @@ const STAT_LABELS = [
   { key: 'total_points',        label: 'Points',      icon: IcStar,   color: 'text-amber'       },
   { key: 'challenges_completed',label: 'Challenges',  icon: IcAward,  color: 'text-blue'        },
   { key: 'businesses_visited',  label: 'Businesses',  icon: IcUsers,  color: 'text-violet-400'  },
-  { key: 'rewards_claimed',     label: 'Rewards',     icon: IcGift,   color: 'text-green-stamp' },
+  { key: 'rewards_claimed',     label: 'Rewards',     icon: IcGift,   color: 'text-green' },
 ]
 
 function timeAgo(dateStr) {
@@ -123,7 +123,7 @@ export default function Profile() {
                   <span>{tier.emoji} {tier.name}</span>
                   <span style={{ color: next.color }}>{next.emoji} {next.name} · {remaining} pts away</span>
                 </div>
-                <div className="h-1 rounded-full overflow-hidden bg-white/10">
+                <div className="h-1 rounded-full overflow-hidden bg-surface-3/30">
                   <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${tier.color}, ${next.color})` }} />
                 </div>
               </div>

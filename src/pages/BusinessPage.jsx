@@ -20,7 +20,7 @@ function TodayHours({ hours }) {
     </span>
   )
   return (
-    <span className="badge-muted text-xs flex items-center gap-1.5 text-green-stamp border-green-stamp/20">
+    <span className="badge-muted text-xs flex items-center gap-1.5 text-green border-green/20">
       <IcClock size={10} /> {today.open} – {today.close}
     </span>
   )
@@ -80,8 +80,8 @@ function ChallengeTicket({ challenge, status }) {
             )}
           </div>
           {isDone && (
-            <div className="w-7 h-7 rounded-full bg-green-stamp/15 flex items-center justify-center flex-shrink-0">
-              <IcCheck size={13} className="text-green-stamp" />
+            <div className="w-7 h-7 rounded-full bg-green/15 flex items-center justify-center flex-shrink-0">
+              <IcCheck size={13} className="text-green" />
             </div>
           )}
         </div>
@@ -103,12 +103,12 @@ function ChallengeTicket({ challenge, status }) {
           <p className="text-text-muted text-xs mt-1">{challenge.reward_description}</p>
         )}
         {challenge.discount_percent && (
-          <p className="text-green-stamp text-xs mt-1 font-bold">{challenge.discount_percent}% off</p>
+          <p className="text-green text-xs mt-1 font-bold">{challenge.discount_percent}% off</p>
         )}
 
         <div className="mt-4">
           {isDone ? (
-            <div className="flex items-center gap-2.5 bg-green-stamp/10 border border-green-stamp/25 text-green-stamp rounded-xl px-4 py-3 text-sm font-display font-bold">
+            <div className="flex items-center gap-2.5 bg-green/10 border border-green/25 text-green rounded-xl px-4 py-3 text-sm font-display font-bold">
               <IcCheck size={16} /> Completed — reward unlocked
             </div>
           ) : isPending ? (
@@ -259,8 +259,8 @@ export default function BusinessPage() {
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {parseInt(biz.weekly_completions) > 0 && (
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-green-stamp animate-pulse flex-shrink-0" />
-                <span className="text-sm font-semibold text-green-stamp">
+                <span className="w-2 h-2 rounded-full bg-green animate-pulse flex-shrink-0" />
+                <span className="text-sm font-semibold text-green">
                   {biz.weekly_completions} {parseInt(biz.weekly_completions) === 1 ? 'person' : 'people'} active this week
                 </span>
               </div>

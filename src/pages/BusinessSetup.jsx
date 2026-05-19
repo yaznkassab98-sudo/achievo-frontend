@@ -45,11 +45,11 @@ export default function BusinessSetup() {
           {STEPS.map((s, i) => (
             <div key={s.n} className="flex items-center gap-2 flex-1">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-display font-black flex-shrink-0 transition-all
-                ${step > s.n ? 'bg-green-stamp text-white' : step === s.n ? 'bg-blue text-white' : 'bg-surface-2 text-text-muted border border-border'}`}>
+                ${step > s.n ? 'bg-green text-white' : step === s.n ? 'bg-blue text-white' : 'bg-surface-2 text-text-muted border border-border'}`}>
                 {step > s.n ? <IcCheck size={12} /> : s.n}
               </div>
               <span className={`text-xs font-display font-bold whitespace-nowrap ${step === s.n ? 'text-text' : 'text-text-muted'}`}>{s.label}</span>
-              {i < STEPS.length - 1 && <div className={`h-px flex-1 transition-colors ${step > s.n ? 'bg-green-stamp/40' : 'bg-border'}`} />}
+              {i < STEPS.length - 1 && <div className={`h-px flex-1 transition-colors ${step > s.n ? 'bg-green/40' : 'bg-border'}`} />}
             </div>
           ))}
         </div>
@@ -156,8 +156,8 @@ export default function BusinessSetup() {
         {/* STEP 3 — success */}
         {step === 3 && created && (
           <div className="card p-10 flex flex-col items-center text-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-green-stamp/15 flex items-center justify-center animate-stamp">
-              <IcCheck size={28} className="text-green-stamp" />
+            <div className="w-16 h-16 rounded-2xl bg-green/15 flex items-center justify-center animate-stamp">
+              <IcCheck size={28} className="text-green" />
             </div>
             <div>
               <h1 className="font-display font-black text-text mb-2" style={{ fontSize: '1.75rem', letterSpacing: '-0.03em' }}>

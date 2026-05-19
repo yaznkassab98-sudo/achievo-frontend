@@ -55,9 +55,9 @@ function OnboardingChecklist({ biz, challenges, staff, qrShared, onNavigate, onD
   const pct = Math.round((completedCount / ONBOARDING_STEPS.length) * 100)
 
   if (allDone) return (
-    <div className="rounded-2xl border border-green-stamp/25 bg-green-stamp/5 p-5 flex items-center gap-4 mb-8">
-      <div className="w-10 h-10 rounded-xl bg-green-stamp/15 flex items-center justify-center flex-shrink-0">
-        <IcCheck size={20} className="text-green-stamp" />
+    <div className="rounded-2xl border border-green/25 bg-green/5 p-5 flex items-center gap-4 mb-8">
+      <div className="w-10 h-10 rounded-xl bg-green/15 flex items-center justify-center flex-shrink-0">
+        <IcCheck size={20} className="text-green" />
       </div>
       <div className="flex-1">
         <p className="font-display font-bold text-text">You're all set! 🎉</p>
@@ -107,7 +107,7 @@ function OnboardingChecklist({ biz, challenges, staff, qrShared, onNavigate, onD
                   border: isDone ? '1px solid rgba(34,197,94,0.2)' : '1px solid rgba(255,255,255,0.08)',
                 }}>
                 {isDone
-                  ? <IcCheck size={16} className="text-green-stamp" />
+                  ? <IcCheck size={16} className="text-green" />
                   : <step.icon size={15} style={{ color: 'rgba(255,255,255,0.5)' }} />
                 }
               </div>
@@ -193,7 +193,7 @@ function DayChart({ dayOfWeek }) {
 
 function CustomerStatus({ lastSeen }) {
   const days = Math.floor((Date.now() - new Date(lastSeen)) / 86400000)
-  if (days <= 14) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-stamp/10 text-green-stamp border border-green-stamp/20">Active</span>
+  if (days <= 14) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green/10 text-green border border-green/20">Active</span>
   if (days <= 30) return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20">Cooling</span>
   return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-coral/10 text-coral border border-coral/20">At risk</span>
 }
@@ -254,7 +254,7 @@ function TemplatePicker({ templates, onPick, onScratch, onClose }) {
                 {items.map(t => (
                   <button key={t.id} onClick={() => onPick(t)}
                     className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-surface hover:border-blue/40 hover:bg-blue/5 transition-all text-left group">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-white border border-border group-hover:border-blue/20">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0 bg-surface border border-border group-hover:border-blue/20">
                       {t.icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -714,7 +714,7 @@ export default function Dashboard() {
                 <p className="text-text-muted text-xs mt-1">Customers</p>
               </div>
               <div className="stat-card stat-card-green">
-                <p className="stat-num text-green-stamp" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
+                <p className="stat-num text-green" style={{ fontSize: 'clamp(1.75rem,4vw,2.5rem)' }}>
                   {stats ? parseInt(stats.total_completions) : '—'}
                 </p>
                 <p className="text-text-muted text-xs mt-1">Completions</p>
@@ -758,7 +758,7 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-2">
                   {flagged.slice(0, 5).map((p) => (
-                    <div key={p.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/50 border border-coral/20">
+                    <div key={p.id} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-2/50 border border-coral/20">
                       <div className="w-8 h-8 rounded-lg bg-coral/10 flex items-center justify-center font-display font-black text-coral text-xs flex-shrink-0">
                         {p.full_name?.[0]}
                       </div>
@@ -788,7 +788,7 @@ export default function Dashboard() {
                 </div>
                 <div className="rounded-2xl overflow-hidden border border-coral/15" style={{ boxShadow: '0 1px 3px rgba(17,24,39,0.06)' }}>
                   {pending.map((p, i) => (
-                    <div key={p.id} className={`flex items-center gap-3 px-4 py-3.5 bg-white ${i < pending.length - 1 ? 'border-b border-border' : ''}`}>
+                    <div key={p.id} className={`flex items-center gap-3 px-4 py-3.5 bg-surface ${i < pending.length - 1 ? 'border-b border-border' : ''}`}>
                       <div className="w-9 h-9 rounded-xl bg-blue/10 flex items-center justify-center font-display font-black text-blue text-sm flex-shrink-0">
                         {p.full_name?.[0]}
                       </div>
@@ -811,8 +811,8 @@ export default function Dashboard() {
 
             {pending.length === 0 && (
               <div className="card p-8 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-green-stamp/10 flex items-center justify-center mx-auto mb-3">
-                  <IcCheck size={20} className="text-green-stamp" />
+                <div className="w-12 h-12 rounded-2xl bg-green/10 flex items-center justify-center mx-auto mb-3">
+                  <IcCheck size={20} className="text-green" />
                 </div>
                 <p className="font-display font-bold text-text mb-1">All caught up</p>
                 <p className="text-text-muted text-sm">No pending confirmations</p>
@@ -1102,7 +1102,7 @@ export default function Dashboard() {
                       <button onClick={() => { setEditChallenge(c); setShowForm(false) }} className="p-2 text-text-muted hover:text-text transition-colors rounded-lg hover:bg-surface-2">
                         <IcPencil size={14} />
                       </button>
-                      <button onClick={() => toggleChallenge(c.id, c.is_active)} className={`p-2 transition-colors rounded-lg hover:bg-surface-2 ${c.is_active ? 'text-blue' : 'text-text-muted hover:text-green-stamp'}`}>
+                      <button onClick={() => toggleChallenge(c.id, c.is_active)} className={`p-2 transition-colors rounded-lg hover:bg-surface-2 ${c.is_active ? 'text-blue' : 'text-text-muted hover:text-green'}`}>
                         {c.is_active ? <IcChevronDown size={14} /> : <IcChevronUp size={14} />}
                       </button>
                       <button onClick={() => deleteChallenge(c.id)} className="p-2 text-text-muted hover:text-coral transition-colors rounded-lg hover:bg-coral/8">
@@ -1170,7 +1170,7 @@ export default function Dashboard() {
                   <IcQr size={48} className="text-text-faint" />
                 </div>
               ) : qrUrl ? (
-                <div className="p-3 bg-white rounded-2xl">
+                <div className="p-3 bg-surface rounded-2xl">
                   <img src={qrUrl} alt="QR Code" className="w-44 h-44 rounded-xl" />
                 </div>
               ) : (
@@ -1185,7 +1185,7 @@ export default function Dashboard() {
                   <code className="input text-xs text-text-muted flex-1 overflow-hidden text-ellipsis">
                     {window.location.origin}/b/{biz.slug}
                   </code>
-                  <button onClick={copyLink} className={`btn-secondary px-3.5 ${copied ? 'text-green-stamp border-green-stamp/30' : ''}`}>
+                  <button onClick={copyLink} className={`btn-secondary px-3.5 ${copied ? 'text-green border-green/30' : ''}`}>
                     {copied ? <IcCheck size={14} /> : <IcCopy size={14} />}
                   </button>
                 </div>
@@ -1395,7 +1395,7 @@ export default function Dashboard() {
                           onClick={() => setHour(key, 'closed', !day.closed)}
                           className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${day.closed ? 'bg-surface-2 border border-border' : 'bg-blue'}`}
                         >
-                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${day.closed ? 'translate-x-0.5' : 'translate-x-4'}`} />
+                          <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-surface shadow transition-transform ${day.closed ? 'translate-x-0.5' : 'translate-x-4'}`} />
                         </button>
                       </div>
                     )

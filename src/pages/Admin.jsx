@@ -27,7 +27,7 @@ const BLANK_TEMPLATE = {
 
 function TemplateCard({ t, onEdit, onToggle, onDelete }) {
   return (
-    <div className={`rounded-2xl border p-4 flex flex-col gap-3 transition-opacity ${t.is_active ? 'border-border bg-white' : 'border-border bg-surface opacity-60'}`}
+    <div className={`rounded-2xl border p-4 flex flex-col gap-3 transition-opacity ${t.is_active ? 'border-border bg-surface' : 'border-border bg-surface opacity-60'}`}
       style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 bg-surface border border-border">
@@ -40,7 +40,7 @@ function TemplateCard({ t, onEdit, onToggle, onDelete }) {
               style={{ background: '#2767FF18', color: '#2767FF' }}>{t.category}</span>
           )}
         </div>
-        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${t.is_active ? 'bg-green-stamp/10 text-green-stamp' : 'bg-coral/10 text-coral'}`}>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${t.is_active ? 'bg-green/10 text-green' : 'bg-coral/10 text-coral'}`}>
           {t.is_active ? 'Active' : 'Off'}
         </span>
       </div>
@@ -62,7 +62,7 @@ function TemplateCard({ t, onEdit, onToggle, onDelete }) {
           <IcPencil size={11} /> Edit
         </button>
         <button onClick={() => onToggle(t.id, t.title)}
-          className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${t.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green-stamp/10 text-green-stamp hover:bg-green-stamp/20'}`}>
+          className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${t.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green/10 text-green hover:bg-green/20'}`}>
           {t.is_active ? 'Deactivate' : 'Activate'}
         </button>
         <button onClick={() => onDelete(t.id, t.title)}
@@ -78,7 +78,7 @@ const PLAN_COLORS = { free: '#9CA3AF', starter: '#2767FF', pro: '#A78BFA', agenc
 
 function StatCard({ label, value, sub, color = '#2767FF' }) {
   return (
-    <div className="rounded-2xl border border-border bg-white p-5" style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
+    <div className="rounded-2xl border border-border bg-surface p-5" style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
       <p className="text-xs font-display font-bold uppercase tracking-widest mb-2" style={{ color }}>{label}</p>
       <p className="font-display font-black text-text" style={{ fontSize: '2rem', letterSpacing: '-0.04em', lineHeight: 1 }}>{value ?? '—'}</p>
       {sub && <p className="text-xs text-text-muted mt-1.5">{sub}</p>}
@@ -90,7 +90,7 @@ function MiniChart({ data }) {
   if (!data?.length) return null
   const max = Math.max(...data.map(d => parseInt(d.customers) + parseInt(d.owners)), 1)
   return (
-    <div className="rounded-2xl border border-border bg-white p-5" style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
+    <div className="rounded-2xl border border-border bg-surface p-5" style={{ boxShadow: '0 1px 4px rgba(17,24,39,0.06)' }}>
       <p className="text-xs font-display font-bold uppercase tracking-widest text-text-muted mb-4">New signups — last 30 days</p>
       <div className="flex items-end gap-1 h-20">
         {data.map((d, i) => {
@@ -305,7 +305,7 @@ export default function Admin() {
   )
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#F4F6FB' }}>
+    <div className="min-h-screen flex" style={{ background: '#07080F' }}>
       {/* SIDEBAR */}
       <aside className="w-56 flex-shrink-0 flex flex-col border-r border-border hidden md:flex"
         style={{ background: 'linear-gradient(180deg, #0A1B33 0%, #0F2444 100%)', minHeight: '100vh' }}>
@@ -342,7 +342,7 @@ export default function Admin() {
       </aside>
 
       {/* MOBILE TOP NAV */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center gap-2 px-4 h-12 border-b border-border bg-white">
+      <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center gap-2 px-4 h-12 border-b border-border bg-surface">
         <div className="w-6 h-6 rounded-md bg-blue flex items-center justify-center">
           <IcAward size={12} className="text-white" />
         </div>
@@ -380,7 +380,7 @@ export default function Admin() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <p className="text-xs font-display font-black uppercase tracking-widest text-text-faint mb-3">Latest businesses</p>
-                        <div className="rounded-2xl border border-border bg-white overflow-hidden">
+                        <div className="rounded-2xl border border-border bg-surface overflow-hidden">
                           {activity.businesses.map(b => (
                             <div key={b.id} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
                               <div className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-black text-sm flex-shrink-0"
@@ -398,7 +398,7 @@ export default function Admin() {
                       </div>
                       <div>
                         <p className="text-xs font-display font-black uppercase tracking-widest text-text-faint mb-3">Latest users</p>
-                        <div className="rounded-2xl border border-border bg-white overflow-hidden">
+                        <div className="rounded-2xl border border-border bg-surface overflow-hidden">
                           {activity.users.map(u => (
                             <div key={u.id} className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
                               <div className="w-9 h-9 rounded-full flex items-center justify-center font-display font-black text-sm flex-shrink-0 bg-blue/10 text-blue border border-blue/15">
@@ -441,7 +441,7 @@ export default function Admin() {
                   <button type="submit" className="btn-primary text-xs px-3 py-0 h-9">Search</button>
                 </form>
               </div>
-              <div className="rounded-2xl border border-border bg-white overflow-hidden">
+              <div className="rounded-2xl border border-border bg-surface overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -468,7 +468,7 @@ export default function Admin() {
                           <td className="px-4 py-3 text-center font-mono text-text-muted">{b.challenge_count}</td>
                           <td className="px-4 py-3 text-center font-mono text-text-muted">{b.completion_count}</td>
                           <td className="px-4 py-3">
-                            <span className={`inline-flex items-center gap-1 text-xs font-bold ${b.is_active ? 'text-green-stamp' : 'text-coral'}`}>
+                            <span className={`inline-flex items-center gap-1 text-xs font-bold ${b.is_active ? 'text-green' : 'text-coral'}`}>
                               {b.is_active ? <IcCheck size={11} /> : <IcX size={11} />}
                               {b.is_active ? 'Active' : 'Inactive'}
                             </span>
@@ -478,7 +478,7 @@ export default function Admin() {
                               <a href={`/b/${b.slug}`} target="_blank" rel="noreferrer"
                                 className="text-xs text-blue hover:underline font-semibold whitespace-nowrap">View</a>
                               <button onClick={() => toggleBiz(b.id, b.name)}
-                                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors whitespace-nowrap ${b.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green-stamp/10 text-green-stamp hover:bg-green-stamp/20'}`}>
+                                className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors whitespace-nowrap ${b.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green/10 text-green hover:bg-green/20'}`}>
                                 {b.is_active ? 'Deactivate' : 'Activate'}
                               </button>
                             </div>
@@ -506,7 +506,7 @@ export default function Admin() {
                   <button type="submit" className="btn-primary text-xs px-3 py-0 h-9">Search</button>
                 </form>
               </div>
-              <div className="rounded-2xl border border-border bg-white overflow-hidden">
+              <div className="rounded-2xl border border-border bg-surface overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -537,7 +537,7 @@ export default function Admin() {
                           <td className="px-4 py-3 text-center font-mono text-text-muted">{u.completion_count}</td>
                           <td className="px-4 py-3">
                             {u.is_verified
-                              ? <span className="text-green-stamp flex items-center gap-1 text-xs font-bold"><IcCheck size={11} /> Yes</span>
+                              ? <span className="text-green flex items-center gap-1 text-xs font-bold"><IcCheck size={11} /> Yes</span>
                               : <span className="text-coral text-xs font-bold flex items-center gap-1"><IcX size={11} /> No</span>
                             }
                           </td>
@@ -547,7 +547,7 @@ export default function Admin() {
                           <td className="px-4 py-3">
                             {!u.is_verified && (
                               <button onClick={() => verifyUser(u.id, u.full_name)}
-                                className="text-xs font-bold px-2.5 py-1 rounded-lg bg-green-stamp/10 text-green-stamp hover:bg-green-stamp/20 transition-colors whitespace-nowrap">
+                                className="text-xs font-bold px-2.5 py-1 rounded-lg bg-green/10 text-green hover:bg-green/20 transition-colors whitespace-nowrap">
                                 Verify
                               </button>
                             )}
@@ -609,7 +609,7 @@ export default function Admin() {
                 </form>
               )}
 
-              <div className="rounded-2xl border border-border bg-white overflow-hidden">
+              <div className="rounded-2xl border border-border bg-surface overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -632,13 +632,13 @@ export default function Admin() {
                           </td>
                           <td className="px-4 py-3 text-center font-mono text-text-muted">{c.business_count}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-bold ${c.is_active ? 'text-green-stamp' : 'text-coral'}`}>
+                            <span className={`text-xs font-bold ${c.is_active ? 'text-green' : 'text-coral'}`}>
                               {c.is_active ? 'Active' : 'Disabled'}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <button onClick={() => toggleCityActive(c.id, c.name)}
-                              className={`text-xs font-bold px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap ${c.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green-stamp/10 text-green-stamp hover:bg-green-stamp/20'}`}>
+                              className={`text-xs font-bold px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap ${c.is_active ? 'bg-coral/10 text-coral hover:bg-coral/20' : 'bg-green/10 text-green hover:bg-green/20'}`}>
                               {c.is_active ? 'Disable' : 'Enable'}
                             </button>
                           </td>
